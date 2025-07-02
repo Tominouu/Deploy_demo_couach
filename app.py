@@ -39,7 +39,8 @@ def login():
             else:
                 app.permanent_session_lifetime = timedelta(hours=1)
             session['user'] = username
-            return redirect('/')
+            return "Connexion réussie"
+            #return redirect('/')
         else:
             return "Échec de la connexion"
     return render_template('login.html')
@@ -54,6 +55,7 @@ def register():
         c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
         conn.commit()
         conn.close()
+        return "Utilisateur créé !"
     except sqlite3.IntegrityError:
         return "Nom d'utilisateur déjà pris"
     return redirect('/login')
