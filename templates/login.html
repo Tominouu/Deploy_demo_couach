@@ -1,0 +1,132 @@
+<body class="yacht-hero min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
+        <!-- Logo Couach -->
+        <div class="text-center mb-8 floating-animation">
+            <img src="https://couach.com/wp-content/uploads/2019/04/Couach-Logo-blanc-WEB-768x170.png" alt="Logo Couach">
+        </div>
+        
+        <!-- Container principal -->
+        <div class="glass-effect rounded-2xl shadow-2xl p-8">
+            <!-- Onglets -->
+            <div class="flex mb-8 border-b border-gray-200">
+                <button id="loginTab" class="tab-button active flex-1 text-center py-3 px-4 font-medium text-gray-600 hover:text-gray-800">
+                    Connexion
+                </button>
+                <button id="registerTab" class="tab-button flex-1 text-center py-3 px-4 font-medium text-gray-600 hover:text-gray-800">
+                    Inscription
+                </button>
+            </div>
+            
+            <!-- Formulaire de connexion -->
+            <div id="loginForm" class="form-container">
+                <form action="/login" method="post" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nom d'utilisateur</label>
+                        <input 
+                            type="text" 
+                            name="username" 
+                            class="input-field w-full px-4 py-3 rounded-lg focus:outline-none" 
+                            placeholder="Entrez votre nom d'utilisateur"
+                            required 
+                        />
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Mot de passe</label>
+                        <input 
+                            type="password" 
+                            name="password" 
+                            class="input-field w-full px-4 py-3 rounded-lg focus:outline-none" 
+                            placeholder="Entrez votre mot de passe"
+                            required 
+                        />
+                    </div>
+                    
+                    <div class="flex items-center justify-between text-sm">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="remember" class="rounded border-gray-300 text-slate-600 mr-2">
+                            <span class="text-gray-600">Se souvenir de moi</span>
+                        </label>
+                        <a href="#" class="text-slate-600 hover:text-slate-800 font-medium">Mot de passe oublié ?</a>
+                    </div>
+                    
+                    <button 
+                        type="submit" 
+                        class="btn-primary w-full py-3 px-4 text-white font-medium rounded-lg relative overflow-hidden"
+                    >
+                        Se connecter
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Formulaire d'inscription -->
+            <div id="registerForm" class="form-container hidden">
+                <form action="/register" method="post" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nom d'utilisateur</label>
+                        <input 
+                            type="text" 
+                            name="username" 
+                            class="input-field w-full px-4 py-3 rounded-lg focus:outline-none" 
+                            placeholder="Choisissez un nom d'utilisateur"
+                            required 
+                        />
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                        <input 
+                            type="email" 
+                            name="email" 
+                            class="input-field w-full px-4 py-3 rounded-lg focus:outline-none" 
+                            placeholder="Entrez votre email"
+                            required 
+                        />
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Mot de passe</label>
+                        <input 
+                            type="password" 
+                            name="password" 
+                            class="input-field w-full px-4 py-3 rounded-lg focus:outline-none" 
+                            placeholder="Créez un mot de passe"
+                            required 
+                        />
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Confirmer le mot de passe</label>
+                        <input 
+                            type="password" 
+                            name="confirm_password" 
+                            class="input-field w-full px-4 py-3 rounded-lg focus:outline-none" 
+                            placeholder="Confirmez votre mot de passe"
+                            required 
+                        />
+                    </div>
+                    
+                    <div class="text-sm">
+                        <label class="flex items-start">
+                            <input type="checkbox" class="rounded border-gray-300 text-slate-600 mr-2 mt-1" required>
+                            <span class="text-gray-600">J'accepte les <a href="#" class="text-slate-600 hover:text-slate-800 font-medium underline">conditions d'utilisation</a> et la <a href="#" class="text-slate-600 hover:text-slate-800 font-medium underline">politique de confidentialité</a></span>
+                        </label>
+                    </div>
+                    
+                    <button 
+                        type="submit" 
+                        class="btn-primary w-full py-3 px-4 text-white font-medium rounded-lg relative overflow-hidden"
+                    >
+                        Créer un compte
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Footer -->
+            <div class="text-center mt-8 pt-6 border-t border-gray-200">
+                <p class="text-xs text-gray-500">
+                    Couach IA - Tous droits réservés &copy; 2025
+                </p>
+            </div>
+        </div>
+    </div>
