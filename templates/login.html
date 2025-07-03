@@ -1,3 +1,10 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CouachGPT</title>
+</head>
 <body class="yacht-hero min-h-screen flex items-center justify-center p-4">
     <div class="w-full max-w-md">
         <!-- Logo Couach -->
@@ -130,3 +137,18 @@
             </div>
         </div>
     </div>
+    <script>
+    // Validation du formulaire d'inscription
+        const registerFormElement = document.querySelector('#registerForm form');
+        registerFormElement.addEventListener('submit', (e) => {
+            const password = registerFormElement.querySelector('input[name="password"]').value;
+            const confirmPassword = registerFormElement.querySelector('input[name="confirm_password"]').value;
+            
+            if (password !== confirmPassword) {
+                e.preventDefault();
+                alert('Les mots de passe ne correspondent pas.');
+            }
+        });
+    </script>
+    </body>
+</html>
