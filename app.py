@@ -25,6 +25,8 @@ def chat():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    if 'user' in session:
+        return redirect('/')
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -35,6 +37,7 @@ def login():
         c.execute("SELECT password FROM users WHERE username = ?", (username,))
         result = c.fetchone()
         conn.close()
+        
         if result and check_password_hash(result[0], password):
             session.permanent = remember  
             if remember:
