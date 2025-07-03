@@ -40,10 +40,7 @@ def login():
             if remember:
                 app.permanent_session_lifetime = timedelta(days=30) #ça c'est ok ça marche mais l'autre en dessous ne marche pas
             else:
-                #app.permanent_session_lifetime = timedelta(days=1) 
-                resp = make_response(redirect('/'))
-                resp.set_cookie('username', username, max_age=60*60*24) # 1 jour
-                return resp
+                app.permanent_session_lifetime = timedelta(days=1) 
             session['user'] = username
             return redirect('/')
         else:
