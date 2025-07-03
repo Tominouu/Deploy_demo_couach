@@ -6,11 +6,12 @@
         
         .ocean-gradient {
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #475569 75%, #64748b 100%);
+            /*background: image(url('https://couach.com/wp-content/uploads/2019/05/013.300dpi4.jpg'));*/
         }
         
         .yacht-hero {
             background: linear-gradient(rgba(15, 23, 42, 0.7), rgba(30, 41, 59, 0.8)), 
-                        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><defs><pattern id="waves" x="0" y="0" width="120" height="60" patternUnits="userSpaceOnUse"><path d="M0 30 Q30 0 60 30 T120 30" stroke="%23ffffff" stroke-width="0.5" fill="none" opacity="0.1"/></pattern></defs><rect width="1200" height="800" fill="%23334155"/><rect width="1200" height="800" fill="url(%23waves)"/></svg>');
+                        url('https://couach.com/wp-content/uploads/2019/05/013.300dpi4.jpg');
             background-size: cover;
             background-position: center;
         }

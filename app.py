@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session, make_response
+from flask import Flask, render_template, request, redirect, session, make_response, flash, url_for
 import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import timedelta
@@ -61,12 +61,12 @@ def register():
         conn.commit()
         conn.close()
     except sqlite3.IntegrityError:
-        return "Nom d'utilisateur déjà pris"
+        flash("Nom d'utilisateur déjà pris", "error") 
     return redirect('/login')
 
 @app.route('/test', methods=['GET', 'POST'])
 def test():
-        return render_template('fix.html')
+        return render_template('404.html')
 
 if __name__ =='__main__':
     init_db()
