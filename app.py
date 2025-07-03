@@ -1,5 +1,6 @@
-from flask import Flask, render_template, request, redirect, session, make_response, flash, url_for
+from flask import Flask, render_template, request, redirect, session, make_response, flash, url_for, jsonify
 import sqlite3
+import requests
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import timedelta
 import datetime
@@ -16,6 +17,21 @@ def init_db():
     c.execute('''CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT)''')
     conn.commit()
     conn.close()
+
+@app.route('/ask', methods=['POST'])
+def ask():
+    data = request.get_json()
+    prompt = data.get('prompt')
+    model = data.get('model', 'mistral')
+    response = requests.post(
+        'http://localhost:11434/api/generate',
+        json={
+            'prompt': prompt,
+            'model': model,
+            'stream': False
+        }
+    )
+    return jsonify(response.json())
 
 @app.route('/')
 def chat():
@@ -66,7 +82,7 @@ def register():
 
 @app.route('/test', methods=['GET', 'POST'])
 def test():
-        return render_template('404.html')
+        return render_template('test.html')
 
 @app.errorhandler(404)
 def page_not_found(e):

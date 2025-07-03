@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat IA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: white;
+            font-family: sans-serif;
+            overflow: hidden;
+        }
+
+        #chat-window {
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+        }
+
+        .user-message {
+            background-color: #1e40af;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            max-width: 70%;
+            align-self: flex-end;
+        }
+
+        .ai-message {
+            background-color: #334155;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            max-width: 70%;
+            align-self: flex-start;
+        }
+
+        #chat-window {
+            display: flex;
+            flex-direction: column;
+        }
+    </style>
+</head>
+<body class="p-4">
+    <div id="chat-history" class="mb-4"></div>
+
+    <div id="chat-window" class="p-4 rounded-lg bg-white/10 h-[calc(100vh-250px)] overflow-y-auto"></div>
+
+    <div class="mt-4">
+        <textarea id="message-input" rows="1" class="w-full p-2 rounded text-black" placeholder="Écrivez votre message ici..."></textarea>
+        <div class="flex justify-between items-center mt-2">
+            <span id="char-count" class="text-sm text-white/60">0/2000</span>
+            <button id="send-btn" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-white">Envoyer</button>
+        </div>
+    </div>
+
+    <script>
+        let currentChatId = null;
+        let chatCounter = 0;
+        const chats = {};
+
+        const messageInput = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+        const charCount = document.getElementById('char-count');
+        const chatHistory = document.getElementById('chat-history');
+
+        function scrollToBottom() {
+            const chatWindow = document.getElementById('chat-window');
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        function showTyping() {
+            const typing = document.createElement('div');
+            typing.id = 'typing-indicator';
+            typing.textContent = "L’IA écrit...";
+            typing.className = "text-white/70 italic mt-2";
+            document.getElementById('chat-window').appendChild(typing);
+            scrollToBottom();
+        }
+
+        function hideTyping() {
+            const typing = document.getElementById('typing-indicator');
+            if (typing) typing.remove();
+        }
+
+        function addMessageToUI(message, isUser) {
+            const chatWindow = document.getElementById('chat-window');
+            const msg = document.createElement('div');
+            msg.className = isUser ? 'user-message self-end' : 'ai-message self-start';
+            msg.textContent = message;
+            chatWindow.appendChild(msg);
+            scrollToBottom();
+        }
+
+        function simulateAIResponse(userMessage) {
+            showTyping();
+
+            fetch("/ask", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    model: "mistral",
+                    prompt: "Agis comme un assistant informatique. Essayes de répondre le plus vite possible. Réponds à la question suivante : " + userMessage,
+                })
+            })
+            
+            .then(response => response.json())
+            .then(data => {
+                hideTyping();
+                const aiResponse = data.response || "Je n'ai pas compris votre question.";
+                addMessageToUI(aiResponse, false);
+
+                if (currentChatId) {
+                    chats[currentChatId].messages.push({
+                        content: userMessage,
+                        isUser: true,
+                        timestamp: new Date()
+                    });
+                    chats[currentChatId].messages.push({
+                        content: aiResponse,
+                        isUser: false,
+                        timestamp: new Date()
+                    });
+                }
+            })
+            .catch(error => {
+                hideTyping();
+                console.error("Erreur IA locale :", error);
+                addMessageToUI("Désolé, une erreur s’est produite lors de la génération de la réponse.", false);
+            });
+        }
+
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            if (!currentChatId) {
+                createNewChat();
+            }
+
+            addMessageToUI(message, true);
+            messageInput.value = '';
+            updateCharCount();
+            adjustTextareaHeight();
+
+            sendBtn.disabled = true;
+
+            simulateAIResponse(message);
+
+            setTimeout(() => {
+                sendBtn.disabled = false;
+            }, 2000);
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+
+        messageInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (!sendBtn.disabled) {
+                    sendMessage();
+                }
+            }
+        });
+
+        messageInput.addEventListener('input', () => {
+            updateCharCount();
+            adjustTextareaHeight();
+        });
+
+        function updateCharCount() {
+            const count = messageInput.value.length;
+            charCount.textContent = `${count}/2000`;
+
+            if (count > 1800) {
+                charCount.classList.add('text-red-500');
+            } else {
+                charCount.classList.remove('text-red-500');
+            }
+
+            if (count >= 2000) {
+                messageInput.value = messageInput.value.substring(0, 2000);
+            }
+        }
+
+        function adjustTextareaHeight() {
+            messageInput.style.height = 'auto';
+            messageInput.style.height = Math.min(messageInput.scrollHeight, 128) + 'px';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            addWelcomeMessage();
+            //setTimeout(() => {
+                //createExampleChats();
+            //}, 500);
+        });
+
+        function addWelcomeMessage() {
+            addMessageToUI("Bonjour ! je suis un assistant informatique", false);
+        }
+
+        function createNewChat() {
+            currentChatId = `chat-${++chatCounter}`;
+            chats[currentChatId] = {
+                id: currentChatId,
+                title: "Nouvelle conversation",
+                messages: [],
+                createdAt: new Date()
+            };
+        }
+
+        function switchToChat(chatId) {
+            currentChatId = chatId;
+            document.getElementById('chat-window').innerHTML = '';
+            const messages = chats[chatId].messages;
+            messages.forEach(m => addMessageToUI(m.content, m.isUser));
+        }
+
+        function deleteChat(chatId) {
+            delete chats[chatId];
+            const item = document.querySelector(`[data-chat-id="${chatId}"]`);
+            if (item) item.remove();
+            if (chatId === currentChatId) {
+                document.getElementById('chat-window').innerHTML = '';
+                currentChatId = null;
+            }
+        }
+
+    </script>
+</body>
+</html>
