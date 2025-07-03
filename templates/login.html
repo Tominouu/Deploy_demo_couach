@@ -161,18 +161,6 @@
             loginForm.classList.add('hidden');
         });
         
-        // Animation des vagues en arrière-plan
-        function createWaveAnimation() {
-            const body = document.body;
-            let waveOffset = 0;
-            
-            setInterval(() => {
-                waveOffset += 0.5;
-                body.style.backgroundPosition = `${waveOffset}px 0`;
-            }, 50);
-        }
-        
-        createWaveAnimation();
     // Validation du formulaire d'inscription
         const registerFormElement = document.querySelector('#registerForm form');
         registerFormElement.addEventListener('submit', (e) => {
