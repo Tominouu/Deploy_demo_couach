@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session, make_response, flash, url_for, jsonify
+from flask import Flask, render_template, request, redirect, session, make_response, flash, url_for, jsonify, Response, stream_with_context
 import sqlite3
 import requests
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -23,15 +23,17 @@ def ask():
     data = request.get_json()
     prompt = data.get('prompt')
     model = data.get('model', 'mistral')
-    response = requests.post(
-        'http://localhost:11434/api/generate',
-        json={
-            'prompt': prompt,
+
+    def generate():
+        with requests.post("http://localhost:11434/api/generate", json={
             'model': model,
-            'stream': False
-        }
-    )
-    return jsonify(response.json())
+            "prompt": prompt,
+            "stream": True
+        }, stream=True) as r:
+            for line in r.iter_lines():
+                if line:
+                    yield line + b'\n'
+    return Response(stream_with_context(generate()), content_type='application/json')
 
 @app.route('/')
 def chat():
