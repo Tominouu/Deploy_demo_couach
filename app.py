@@ -1,7 +1,10 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, make_response
 import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import timedelta
+import datetime
+import random
+
 
 app = Flask(__name__)
 app.secret_key = 'super-secret-key'
@@ -35,14 +38,17 @@ def login():
         if result and check_password_hash(result[0], password):
             session.permanent = remember  
             if remember:
-                app.permanent_session_lifetime = timedelta(days=30)
+                app.permanent_session_lifetime = timedelta(days=30) #ça c'est ok ça marche mais l'autre en dessous ne marche pas
             else:
-                app.permanent_session_lifetime = timedelta(hours=1)
+                #app.permanent_session_lifetime = timedelta(days=1) 
+                resp = make_response(redirect('/'))
+                resp.set_cookie('username', username, max_age=60*60*24) # 1 jour
+                return resp
             session['user'] = username
             return redirect('/')
         else:
             return "Échec de la connexion"
-    return render_template('login.html')
+    return render_template('login.html') #les fichiers html sont dans le dossier templates, on peut pas les mettre ailleurs
 
 @app.route('/register', methods=['POST'])
 def register():
