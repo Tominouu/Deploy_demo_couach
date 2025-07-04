@@ -28,7 +28,8 @@ def ask():
         with requests.post("http://localhost:11434/api/generate", json={
             "model": model,
             "prompt": prompt,
-            "stream": True
+            "stream": True,
+            "max_tokens": 1024
         }, stream=True) as r:
             for line in r.iter_lines():
                 if line:
