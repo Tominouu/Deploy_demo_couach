@@ -26,14 +26,15 @@ def ask():
 
     def generate():
         with requests.post("http://localhost:11434/api/generate", json={
-            'model': model,
+            "model": model,
             "prompt": prompt,
             "stream": True
         }, stream=True) as r:
             for line in r.iter_lines():
                 if line:
                     yield line + b'\n'
-    return Response(stream_with_context(generate()), content_type='application/json')
+
+    return Response(stream_with_context(generate()), content_type='text/plain')
 
 @app.route('/')
 def chat():

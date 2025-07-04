@@ -97,40 +97,68 @@
 
             fetch("/ask", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     model: "mistral",
-                    prompt: "Agis comme un assistant informatique. Essayes de répondre le plus vite possible. Réponds à la question suivante : " + userMessage,
+                    prompt:"Tu es un assistant ingénieur informatique, tu dois répondre aux questions suivantes de l'utilisateur de manière concise et précise, en étant le plus rapide. " + userMessage,
                 })
             })
-            
-            .then(response => response.json())
-            .then(data => {
-                hideTyping();
-                const aiResponse = data.response || "Je n'ai pas compris votre question.";
-                addMessageToUI(aiResponse, false);
+            .then(response => {
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+                let fullResponse = '';
 
-                if (currentChatId) {
-                    chats[currentChatId].messages.push({
-                        content: userMessage,
-                        isUser: true,
-                        timestamp: new Date()
-                    });
-                    chats[currentChatId].messages.push({
-                        content: aiResponse,
-                        isUser: false,
-                        timestamp: new Date()
+                function read() {
+                    return reader.read().then(({ done, value }) => {
+                        if (done) {
+                            hideTyping();
+                            return;
+                        }
+
+                        buffer += decoder.decode(value, { stream: true });
+
+                        const lines = buffer.split('\n');
+                        buffer = lines.pop(); // garde la ligne incomplète
+
+                        for (const line of lines) {
+                            try {
+                                const json = JSON.parse(line);
+                                if (json.response) {
+                                    fullResponse += json.response;
+                                    updateAIMessage(fullResponse);
+                                }
+                            } catch (e) {
+                                console.warn("Ligne invalide JSON", line);
+                            }
+                        }
+
+                        return read();
                     });
                 }
+
+                //lis le flux entrant
+                read();
             })
-            .catch(error => {
+            .catch(err => {
+                console.error("Erreur IA locale :", err);
                 hideTyping();
-                console.error("Erreur IA locale :", error);
-                addMessageToUI("Désolé, une erreur s’est produite lors de la génération de la réponse.", false);
+                addMessageToUI("Erreur réseau ou serveur IA.", false);
             });
         }
+
+        // fonction qui affiche les messages progressivement
+        let aiMessageElement = null;
+        function updateAIMessage(text) {
+            if (!aiMessageElement) {
+                aiMessageElement = document.createElement('div');
+                aiMessageElement.className = 'ai-message self-start';
+                document.getElementById('chat-window').appendChild(aiMessageElement);
+            }
+            aiMessageElement.textContent = text;
+            scrollToBottom();
+        }
+
 
         function sendMessage() {
             const message = messageInput.value.trim();
