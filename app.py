@@ -22,14 +22,14 @@ def init_db():
 def ask():
     data = request.get_json()
     prompt = data.get('prompt')
-    model = data.get('model', 'mistral')
+    model = data.get('model', 'phi3:mini')
 
     def generate():
         with requests.post("http://localhost:11434/api/generate", json={
             "model": model,
             "prompt": prompt,
             "stream": True,
-            "max_tokens": 1024
+            "max_tokens": 512
         }, stream=True) as r:
             for line in r.iter_lines():
                 if line:
