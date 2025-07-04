@@ -68,7 +68,7 @@ def login():
             return redirect('/')
         else:
             return "Échec de la connexion"
-    return render_template('login.html') #les fichiers html sont dans le dossier templates, on peut pas les mettre ailleurs
+    return render_template('login.html') #les fichiers html sont dans le dossier templates, on peut pas les mettre ailleurs.
 
 @app.route('/register', methods=['POST'])
 def register():
