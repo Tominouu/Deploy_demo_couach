@@ -100,7 +100,7 @@
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     model: "phi3:mini",
-                    prompt:"Tu es un assistant informatique français, tu dois répondre aux questions suivantes en étant le plus rapide. " + userMessage,
+                    prompt:"Tu es un assistant informatique, tu dois répondre aux questions suivantes en étant le plus rapide. " + userMessage,
                 })
             })
             .then(response => {

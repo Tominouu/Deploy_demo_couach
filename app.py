@@ -41,7 +41,7 @@ def ask():
 def chat():
     if 'user' not in session:
         return redirect('/login')
-    return render_template("chat.html")
+    return render_template('chat.html', user=session['user'])
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
