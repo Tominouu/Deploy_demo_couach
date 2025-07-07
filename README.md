@@ -114,7 +114,7 @@ Après tests :
 
 ## 📚 Auteur
 
-Projet réalisé par **Tom LECLERCQ**, dans le cadre d’un **stage en R&D chez Couach**, encadré par [Clément Macadré].
+Projet réalisé par **Tom LECLERCQ**, dans le cadre d’un **stage en R&D chez Couach**, encadré par **Clément Macadré**.
 
 Date : **Juillet - Août 2025**
 
