@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, redirect, session, make_response, flash, url_for, jsonify, Response, stream_with_context, json
+from flask import Flask, render_template, request, redirect, session, make_response, flash, url_for, jsonify, Response, stream_with_context
+import json
 import sqlite3
 import requests
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -32,30 +33,33 @@ def ask():
     data = request.get_json()
     prompt = data.get('prompt')
     model = data.get('model', 'phi3:mini')
+    user = session.get('user', 'anonyme')
 
     def generate():
-        with requests.post("http://localhost:11434/api/generate", json={
-            "model": model,
-            "prompt": prompt,
-            "stream": True,
-            "max_tokens": 512
-        }, stream=True) as r:
-            for line in r.iter_lines():
-                if line:
-                    decoded_line = line.decode('utf-8')
-                    yield line + b'\n'
-                    try:
-                        json_data = json.loads()
-                        if "response" in json_data:
-                            full_response += json_data["response"]
-                    except Exception as e:
-                        print("Erreur parsing JSON stream:", decoded_line)
-        
-        if prompt:
-            save_history(user=session['user'], model=model, prompt=prompt, response=full_response)
+        full_response = ""
+        try:
+            with requests.post("http://localhost:11434/api/generate", json={
+                "model": model,
+                "prompt": prompt,
+                "stream": True,
+                "max_tokens": 512
+            }, stream=True) as r:
+                for line in r.iter_lines():
+                    if line:
+                        decoded_line = line.decode("utf-8")
+                        yield line + b'\n'
+                        try:
+                            json_data = json.loads(decoded_line)
+                            if "response" in json_data:
+                                full_response += json_data["response"]
+                        except json.JSONDecodeError:
+                            print("Erreur parsing JSON stream:", decoded_line)
+        finally:
+            # Enregistrement seulement si on a un prompt et une réponse complète
+            if prompt and full_response:
+                save_history(user=user, model=model, prompt=prompt, response=full_response)
 
     return Response(stream_with_context(generate()), content_type='text/plain')
-    
 
 
 @app.route('/')
