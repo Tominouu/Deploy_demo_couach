@@ -1,0 +1,158 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    
+        
+        .yacht-hero {
+            background: linear-gradient(rgba(99, 110, 136, 0.7), rgba(54, 67, 88, 0.8)), url(https://couach.com/wp-content/uploads/2019/05/013.300dpi4.jpg);
+            background-size: cover;
+            
+            
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .glass-dark {
+            background: rgba(51, 65, 85, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar {
+            width: 320px;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar.collapsed {
+            width: 60px;
+        }
+        
+        .chat-message {
+            animation: fadeInUp 0.5s ease-out;
+            margin-bottom: 1rem;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .message-user {
+            background: linear-gradient(135deg, #334155 0%, #475569 100%);
+            color: white;
+            margin-left: auto;
+            max-width: 80%;
+        }
+        
+        .message-ai {
+            background: rgba(248, 250, 252, 0.9);
+            color: #1e293b;
+            margin-right: auto;
+            max-width: 80%;
+            border: 1px solid rgba(51, 65, 85, 0.1);
+        }
+        
+        .typing-indicator {
+            display: none;
+        }
+        
+        .typing-indicator.active {
+            display: flex;
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #64748b;
+            animation: typing 1.4s infinite ease-in-out both;
+        }
+        
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes typing {
+            0%, 80%, 100% {
+                transform: scale(0);
+            }
+            40% {
+                transform: scale(1);
+            }
+        }
+        
+        .input-field {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            background: rgba(248, 250, 252, 0.9);
+            resize: none;
+        }
+        
+        .input-field:focus {
+            border-color: #334155;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(51, 65, 85, 0.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #334155 0%, #475569 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(51, 65, 85, 0.4);
+        }
+        
+        .btn-primary:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .chat-item {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .chat-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .chat-item.active {
+            background: rgba(255, 255, 255, 0.2);
+            border-left: 3px solid white;
+        }
+        
+        .scroll-smooth {
+            scroll-behavior: smooth;
+        }
+        
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(51, 65, 85, 0.5);
+            border-radius: 3px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(51, 65, 85, 0.7);
+        }

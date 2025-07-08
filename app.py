@@ -86,7 +86,7 @@ def register():
 
 @app.route('/test', methods=['GET', 'POST'])
 def test():
-        return render_template('test.html')
+        return render_template('test-brain.html')
 
 @app.errorhandler(404)
 def page_not_found(e):
