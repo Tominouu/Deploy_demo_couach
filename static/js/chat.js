@@ -389,6 +389,12 @@
                                     isUser: false,
                                     timestamp: new Date()
                                 });
+                                console.log("Réponse IA complète :", JSON.stringify({
+                                    model: "phi3:mini",
+                                    prompt: userMessage,
+                                    response: fullResponse,
+                                    timestamp: new Date().toISOString()
+                                }, null, 2));
                             }
                             
                             aiMessageElement = null; // Reset pour prochain message
@@ -418,6 +424,7 @@
 
                 // Lire le flux entrant
                 return read();
+                
             })
             .catch(err => {
                 console.error("Erreur IA locale :", err);

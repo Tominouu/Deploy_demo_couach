@@ -1,5 +1,5 @@
 # Python
-users.db
+
 __pycache__/
 *.pyc
 
@@ -9,10 +9,7 @@ instance/
 *.env
 
 # SQLite DB
-*.db
-*.db-journal
-*.sqlite
-*.sqlite3
+
 
 # VS Code
 .vscode/

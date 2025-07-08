@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session, make_response, flash, url_for, jsonify, Response, stream_with_context
+from flask import Flask, render_template, request, redirect, session, make_response, flash, url_for, jsonify, Response, stream_with_context, json
 import sqlite3
 import requests
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -18,6 +18,15 @@ def init_db():
     conn.commit()
     conn.close()
 
+def save_history(user, model, prompt, response):
+    conn = sqlite3.connect('history.db')
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS history (id INTEGER PRIMARY KEY, user TEXT, model TEXT, prompt TEXT, response TEXT, timestamp DATETIME)''')
+    c.execute('INSERT INTO history (user, model, prompt, response, timestamp) VALUES (?, ?, ?, ?, ?)',
+              (user, model, prompt, response, datetime.datetime.now()))
+    conn.commit()
+    conn.close()
+
 @app.route('/ask', methods=['POST'])
 def ask():
     data = request.get_json()
@@ -33,9 +42,21 @@ def ask():
         }, stream=True) as r:
             for line in r.iter_lines():
                 if line:
+                    decoded_line = line.decode('utf-8')
                     yield line + b'\n'
+                    try:
+                        json_data = json.loads()
+                        if "response" in json_data:
+                            full_response += json_data["response"]
+                    except Exception as e:
+                        print("Erreur parsing JSON stream:", decoded_line)
+        
+        if prompt:
+            save_history(user=session['user'], model=model, prompt=prompt, response=full_response)
 
     return Response(stream_with_context(generate()), content_type='text/plain')
+    
+
 
 @app.route('/')
 def chat():
