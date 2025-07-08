@@ -1,0 +1,10 @@
+[
+  {
+    "type": "sqlite",
+    "path": "/home/couachgpt/couachgpt/users.db"
+  },
+  {
+    "type": "sqlite",
+    "path": "/home/couachgpt/couachgpt/history.db"
+  }
+]

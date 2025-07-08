@@ -96,6 +96,23 @@
             messageInput.focus();
         });
 
+        window.addEventListener("DOMContentLoaded", () => {
+            fetch("/history")
+                .then(res => res.json())
+                .then(data => {
+                    data.reverse(); // Pour avoir les plus anciens en haut
+                    data.forEach(entry => {
+                        addMessageToUI(entry.response, true);
+                        //addMessageToUI(entry.prompt, true);
+                        addMessageToUI(`${entry.timestamp}`, false)
+                        
+                        
+                    });
+                })
+                .catch(err => console.error("Erreur chargement historique :", err));
+        });
+
+
          function createNewChat() {
             chatCounter++;
             const chatId = `chat-${chatCounter}`;
@@ -368,7 +385,8 @@
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     model: "phi3:mini",
-                    prompt: "Tu es un assistant informatique spécialisé pour l'entreprise Couach, tu dois répondre aux questions suivantes en étant le plus rapide et précis possible : " + userMessage,
+                    userMessage: userMessage,
+                    prompt: "Tu es un assistant informatique, tu dois répondre aux questions suivantes en étant le plus rapide et précis possible : " + userMessage,
                 })
             })
             .then(response => {
@@ -393,6 +411,7 @@
                                     model: "phi3:mini",
                                     prompt: userMessage,
                                     response: fullResponse,
+                                    message: userMessage,
                                     timestamp: new Date().toISOString()
                                 }, null, 2));
                             }

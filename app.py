@@ -16,6 +16,24 @@ def init_db():
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT)''')
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS conversations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user TEXT,
+            title TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            conversation_id INTEGER,
+            prompt TEXT,
+            response TEXT,
+            timestamp DATETIME,
+            FOREIGN KEY (conversation_id) REFERENCES conversations(id)
+        )
+    ''')
     conn.commit()
     conn.close()
 
@@ -31,6 +49,7 @@ def save_history(user, model, prompt, response):
 @app.route('/ask', methods=['POST'])
 def ask():
     data = request.get_json()
+    message = data.get('userMessage', '')
     prompt = data.get('prompt')
     model = data.get('model', 'phi3:mini')
     user = session.get('user', 'anonyme')
@@ -57,9 +76,30 @@ def ask():
         finally:
             # Enregistrement seulement si on a un prompt et une réponse complète
             if prompt and full_response:
-                save_history(user=user, model=model, prompt=prompt, response=full_response)
+                save_history(user=user, model=model, prompt=message, response=full_response)
 
     return Response(stream_with_context(generate()), content_type='text/plain')
+
+@app.route('/history', methods=['GET'])
+def history():
+    user = session.get('user')
+    if not user:
+        return jsonify([])
+    conn = sqlite3.connect('history.db')
+    c = conn.cursor()
+    c.execute('SELECT model, prompt, response, timestamp FROM history WHERE user = ? ORDER BY timestamp DESC', (user,))
+    rows = c.fetchall()
+    conn.close()
+    history_data = [
+        {
+            'prompt': row[0],
+            'response': row[1],
+            'timestamp': row[2],
+        } for row in rows
+    ]
+    return jsonify(history_data)
+
+
 
 
 @app.route('/')
