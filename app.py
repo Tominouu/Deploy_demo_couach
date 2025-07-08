@@ -15,6 +15,8 @@ app.permanent_session_lifetime = timedelta(hours=1)
 def init_db():
     conn = sqlite3.connect('users.db')  # Une seule base de données
     c = conn.cursor()
+
+    #c.execute('DROP TABLE conversations')
     
     # Table users
     c.execute('''CREATE TABLE IF NOT EXISTS users (

@@ -387,9 +387,9 @@
                                 </svg>
                             </div>
                             <div>
-                                <p class="font-medium text-slate-800 mb-1">Assistant Couach IA</p>
+                                <p class="font-medium text-slate-800 mb-1">Assistant CouachGPT</p>
                                 <div class="text-slate-700">
-                                    <p>Bonjour ! Je suis votre assistant Couach spécialisé en programmation.</p>
+                                    <p>Bonjour ! Je suis votre assistant CouachGPT</p>
                                     <p class="mt-2">Je peux vous aider avec :</p>
                                     <ul class="mt-2 space-y-1 text-sm">
                                         <li>• Développement web</li>
