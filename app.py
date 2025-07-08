@@ -13,9 +13,17 @@ app.secret_key = 'super-secret-key'
 app.permanent_session_lifetime = timedelta(hours=1)
 
 def init_db():
-    conn = sqlite3.connect('users.db')
+    conn = sqlite3.connect('users.db')  # Une seule base de données
     c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT)''')
+    
+    # Table users
+    c.execute('''CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY, 
+        username TEXT UNIQUE, 
+        password TEXT
+    )''')
+    
+    # Table conversations
     c.execute('''
         CREATE TABLE IF NOT EXISTS conversations (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -24,34 +32,41 @@ def init_db():
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     ''')
+    
+    # Table history
     c.execute('''
         CREATE TABLE IF NOT EXISTS history (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             conversation_id INTEGER,
             prompt TEXT,
             response TEXT,
-            timestamp DATETIME,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (conversation_id) REFERENCES conversations(id)
         )
     ''')
+    
     conn.commit()
     conn.close()
 
-def save_history(user, model, prompt, response):
-    conn = sqlite3.connect('history.db')
+
+def save_history(conversation_id, prompt, response):
+    conn = sqlite3.connect('users.db')  # Utiliser la même base que les conversations
     c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS history (id INTEGER PRIMARY KEY, user TEXT, model TEXT, prompt TEXT, response TEXT, timestamp DATETIME)''')
-    c.execute('INSERT INTO history (user, model, prompt, response, timestamp) VALUES (?, ?, ?, ?, ?)',
-              (user, model, prompt, response, datetime.datetime.now()))
+    c.execute('''
+        INSERT INTO history (conversation_id, prompt, response, timestamp)
+        VALUES (?, ?, ?, ?)
+    ''', (conversation_id, prompt, response, datetime.datetime.now()))
     conn.commit()
     conn.close()
+
 
 @app.route('/ask', methods=['POST'])
 def ask():
     data = request.get_json()
-    message = data.get('userMessage', '')
     prompt = data.get('prompt')
     model = data.get('model', 'phi3:mini')
+    message = data.get('userMessage', '')
+    conversation_id = data.get('conversation_id')
     user = session.get('user', 'anonyme')
 
     def generate():
@@ -73,12 +88,25 @@ def ask():
                                 full_response += json_data["response"]
                         except json.JSONDecodeError:
                             print("Erreur parsing JSON stream:", decoded_line)
+        except Exception as e:
+            print(f"Erreur lors de l'appel à Ollama: {e}")
         finally:
-            # Enregistrement seulement si on a un prompt et une réponse complète
-            if prompt and full_response:
-                save_history(user=user, model=model, prompt=message, response=full_response)
+            if prompt and full_response and conversation_id:
+                try:
+                    # Utiliser la même base de données
+                    conn = sqlite3.connect('users.db')
+                    c = conn.cursor()
+                    c.execute('''
+                        INSERT INTO history (conversation_id, prompt, response, timestamp)
+                        VALUES (?, ?, ?, ?)
+                    ''', (conversation_id, message, full_response, datetime.datetime.now()))
+                    conn.commit()
+                    conn.close()
+                except Exception as e:
+                    print(f"Erreur lors de la sauvegarde: {e}")
 
     return Response(stream_with_context(generate()), content_type='text/plain')
+
 
 @app.route('/history', methods=['GET'])
 def history():
@@ -99,8 +127,86 @@ def history():
     ]
     return jsonify(history_data)
 
+@app.route('/conversation', methods=['POST'])
+def create_or_select_conversation():
+    user = session.get('user')
+    if not user:
+        return jsonify({'error': 'Utilisateur non connecté'}), 403
 
+    try:
+        data = request.get_json()
+        title = data.get('title', 'Nouvelle conversation')
 
+        conn = sqlite3.connect('users.db')  # Même base que les utilisateurs
+        c = conn.cursor()
+        c.execute('INSERT INTO conversations (user, title) VALUES (?, ?)', (user, title))
+        conversation_id = c.lastrowid
+        conn.commit()
+        conn.close()
+
+        return jsonify({'conversation_id': conversation_id})
+    
+    except Exception as e:
+        print(f"Erreur lors de la création de la conversation: {e}")
+        return jsonify({'error': 'Erreur serveur'}), 500
+
+@app.route('/conversations', methods=['GET'])
+def list_conversations():
+    user = session.get('user')
+    if not user:
+        return jsonify([])
+
+    try:
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        c.execute('SELECT id, title, created_at FROM conversations WHERE user = ? ORDER BY created_at DESC', (user,))
+        rows = c.fetchall()
+        conn.close()
+
+        return jsonify([
+            {'id': row[0], 'title': row[1], 'created_at': row[2]}
+            for row in rows
+        ])
+    
+    except Exception as e:
+        print(f"Erreur lors du chargement des conversations: {e}")
+        return jsonify([])
+
+@app.route('/conversation/<int:conversation_id>/history')
+def get_conversation_history(conversation_id):
+    user = session.get('user')
+    if not user:
+        return jsonify([])
+
+    try:
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        
+        # Vérifier que la conversation appartient à l'utilisateur
+        c.execute('SELECT user FROM conversations WHERE id = ?', (conversation_id,))
+        conv_user = c.fetchone()
+        
+        if not conv_user or conv_user[0] != user:
+            return jsonify({'error': 'Conversation non trouvée'}), 404
+        
+        # Récupérer l'historique
+        c.execute('''
+            SELECT prompt, response, timestamp 
+            FROM history 
+            WHERE conversation_id = ?
+            ORDER BY timestamp ASC
+        ''', (conversation_id,))
+        rows = c.fetchall()
+        conn.close()
+
+        return jsonify([
+            {'prompt': row[0], 'response': row[1], 'timestamp': row[2]}
+            for row in rows
+        ])
+    
+    except Exception as e:
+        print(f"Erreur lors du chargement de l'historique: {e}")
+        return jsonify([])
 
 @app.route('/')
 def chat():

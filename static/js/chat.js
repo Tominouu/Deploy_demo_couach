@@ -96,38 +96,138 @@
             messageInput.focus();
         });
 
-        window.addEventListener("DOMContentLoaded", () => {
-            fetch("/history")
-                .then(res => res.json())
-                .then(data => {
-                    data.reverse(); // Pour avoir les plus anciens en haut
-                    data.forEach(entry => {
-                        addMessageToUI(entry.response, true);
-                        //addMessageToUI(entry.prompt, true);
-                        addMessageToUI(`${entry.timestamp}`, false)
-                        
-                        
-                    });
-                })
-                .catch(err => console.error("Erreur chargement historique :", err));
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Initialisation des éléments DOM
+            if (!initializeElements()) {
+                console.error('Éléments du formulaire non trouvés');
+                return;
+            }
+
+            // Initialisation des événements
+            initializeEventListeners();
+
+            // Chargement des conversations existantes
+            await loadExistingChats();
+
+            // Focus sur l'input
+            messageInput.focus();
         });
 
 
-         function createNewChat() {
-            chatCounter++;
-            const chatId = `chat-${chatCounter}`;
-            const chatTitle = `Conversation ${chatCounter}`;
+         async function createNewChat() {
+            const title = `Conversation ${chatCounter + 1}`;
             
-            chats[chatId] = {
-                id: chatId,
-                title: chatTitle,
-                messages: [],
-                createdAt: new Date()
-            };
-            
-            addChatToHistory(chatId, chatTitle);
-            switchToChat(chatId);
+            try {
+                const response = await fetch('/conversation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title })
+                });
+
+                // Vérifier si la réponse est OK
+                if (!response.ok) {
+                    console.error('Erreur serveur:', response.status, response.statusText);
+                    alert(`Erreur lors de la création de la conversation: ${response.status}`);
+                    return;
+                }
+
+                // Vérifier le type de contenu
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    console.error('Réponse non-JSON reçue:', contentType);
+                    const textResponse = await response.text();
+                    console.error('Contenu de la réponse:', textResponse);
+                    alert('Erreur: Réponse serveur invalide');
+                    return;
+                }
+
+                const data = await response.json();
+                
+                if (!data.conversation_id) {
+                    alert('Erreur lors de la création de la conversation.');
+                    return;
+                }
+
+                chatCounter++;
+                const chatId = `chat-${chatCounter}`;
+                const conversationId = data.conversation_id;
+
+                chats[chatId] = {
+                    id: chatId,
+                    dbId: conversationId,
+                    title,
+                    messages: [],
+                    createdAt: new Date()
+                };
+
+                addChatToHistory(chatId, title);
+                switchToChat(chatId);
+
+            } catch (error) {
+                console.error('Erreur lors de la création du chat:', error);
+                alert('Erreur de connexion lors de la création de la conversation');
+            }
         }
+
+        async function loadExistingChats() {
+            try {
+                const response = await fetch('/conversations');
+                
+                if (!response.ok) {
+                    console.error('Erreur lors du chargement des conversations:', response.status);
+                    return;
+                }
+
+                const conversations = await response.json();
+
+                conversations.forEach((conv, index) => {
+                    const chatId = `chat-${index + 1}`;
+                    chats[chatId] = {
+                        id: chatId,
+                        dbId: conv.id,
+                        title: conv.title,
+                        messages: [],
+                        createdAt: new Date(conv.created_at)
+                    };
+                    addChatToHistory(chatId, conv.title);
+                });
+
+                // Mettre à jour le compteur
+                chatCounter = conversations.length;
+
+                if (Object.keys(chats).length > 0) {
+                    const firstChatId = Object.keys(chats)[0];
+                    switchToChat(firstChatId);
+                } else {
+                    // Si aucune conversation, en créer une nouvelle
+                    await createNewChat();
+                }
+
+            } catch (error) {
+                console.error('Erreur lors du chargement des conversations:', error);
+                // En cas d'erreur, créer une nouvelle conversation
+                await createNewChat();
+            }
+        }
+
+
+
+
+         //function createNewChat() {
+            //chatCounter++;
+            //const chatId = `chat-${chatCounter}`;
+            //const chatTitle = `Conversation ${chatCounter}`;
+            
+           // chats[chatId] = {
+                //id: chatId,
+                //title: chatTitle,
+                //messages: [],
+                //createdAt: new Date()
+           // };
+            
+            //addChatToHistory(chatId, chatTitle);
+            //switchToChat(chatId);
+        //}
         
         function addChatToHistory(chatId, title) {
             const chatItem = document.createElement('div');
@@ -176,30 +276,79 @@
             loadChatMessages(chatId);
         }
         
-        function deleteChat(chatId) {
+        async function deleteChat(chatId) {
             if (confirm('Êtes-vous sûr de vouloir supprimer cette conversation ?')) {
+                const chat = chats[chatId];
+                
+                // Optionnel : supprimer aussi de la base de données
+                try {
+                    await fetch(`/conversation/${chat.dbId}`, {
+                        method: 'DELETE'
+                    });
+                } catch (error) {
+                    console.error('Erreur lors de la suppression:', error);
+                }
+                
                 delete chats[chatId];
                 document.querySelector(`[data-chat-id="${chatId}"]`).remove();
                 
                 if (currentChatId === chatId) {
                     currentChatId = null;
                     clearMessages();
+                    addWelcomeMessage();
                 }
             }
         }
-        
-        function loadChatMessages(chatId) {
+
+        async function loadChatMessages(chatId) {
             clearMessages();
-            
+
             const chat = chats[chatId];
-            if (chat && chat.messages.length > 0) {
-                chat.messages.forEach(message => {
-                    addMessageToUI(message.content, message.isUser, false);
+            if (!chat) return;
+
+            // Si on a déjà les messages en cache
+            if (chat.messages.length > 0) {
+                chat.messages.forEach(msg => {
+                    addMessageToUI(msg.content, msg.isUser, false);
                 });
-            } else {
+                return;
+            }
+
+            // Sinon, les charger depuis la base
+            try {
+                const response = await fetch(`/conversation/${chat.dbId}/history`);
+                const history = await response.json();
+
+                history.forEach(entry => {
+                    const userMsg = { content: entry.prompt, isUser: true };
+                    const aiMsg = { content: entry.response, isUser: false };
+                    
+                    chat.messages.push(userMsg);
+                    chat.messages.push(aiMsg);
+                    
+                    addMessageToUI(userMsg.content, userMsg.isUser, false);
+                    addMessageToUI(aiMsg.content, aiMsg.isUser, false);
+                });
+            } catch (error) {
+                console.error('Erreur lors du chargement de l\'historique:', error);
                 addWelcomeMessage();
             }
         }
+
+
+        
+        //function loadChatMessages(chatId) {
+           // clearMessages();
+            
+            //const chat = chats[chatId];
+         //   if (chat && chat.messages.length > 0) {
+           //     chat.messages.forEach(message => {
+             //       addMessageToUI(message.content, message.isUser, false);
+               // });
+          //  } else {
+             //   addWelcomeMessage();
+           // }
+       // }
         
         function clearMessages() {
             messagesContainer.innerHTML = '';
@@ -375,91 +524,19 @@
             scrollToBottom();
         }
         
-        // Simulation de réponse IA avec streaming
-        function simulateAIResponse(userMessage) {
-            showTyping();
-            aiMessageElement = null; // Reset pour nouveau message
-
-            fetch("/ask", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    model: "phi3:mini",
-                    userMessage: userMessage,
-                    prompt: "Tu es un assistant informatique, tu dois répondre aux questions suivantes en étant le plus rapide et précis possible : " + userMessage,
-                })
-            })
-            .then(response => {
-                const reader = response.body.getReader();
-                const decoder = new TextDecoder();
-                let buffer = '';
-                let fullResponse = '';
-
-                function read() {
-                    return reader.read().then(({ done, value }) => {
-                        if (done) {
-                            hideTyping();
-                            
-                            // Sauvegarder la réponse complète dans l'historique
-                            if (currentChatId && fullResponse) {
-                                chats[currentChatId].messages.push({
-                                    content: fullResponse,
-                                    isUser: false,
-                                    timestamp: new Date()
-                                });
-                                console.log("Réponse IA complète :", JSON.stringify({
-                                    model: "phi3:mini",
-                                    prompt: userMessage,
-                                    response: fullResponse,
-                                    message: userMessage,
-                                    timestamp: new Date().toISOString()
-                                }, null, 2));
-                            }
-                            
-                            aiMessageElement = null; // Reset pour prochain message
-                            return;
-                        }
-
-                        buffer += decoder.decode(value, { stream: true });
-
-                        const lines = buffer.split('\n');
-                        buffer = lines.pop(); // garde la ligne incomplète
-
-                        for (const line of lines) {
-                            try {
-                                const json = JSON.parse(line);
-                                if (json.response) {
-                                    fullResponse += json.response;
-                                    updateAIMessage(fullResponse);
-                                }
-                            } catch (e) {
-                                console.warn("Ligne invalide JSON", line);
-                            }
-                        }
-
-                        return read();
-                    });
-                }
-
-                // Lire le flux entrant
-                return read();
-                
-            })
-            .catch(err => {
-                console.error("Erreur IA locale :", err);
-                hideTyping();
-                addMessageToUI("Erreur : Impossible de se connecter à l'IA locale. Assurez-vous que le service Ollama est bien lancé.", false);
-                aiMessageElement = null;
-            });
-        }
 
         // Envoi de message
-        function sendMessage() {
+        async function sendMessage() {
             const message = messageInput.value.trim();
             if (!message) return;
             
             if (!currentChatId) {
-                createNewChat();
+                await createNewChat();
+                // Vérifier si la création a réussi
+                if (!currentChatId) {
+                    alert('Impossible de créer une nouvelle conversation');
+                    return;
+                }
             }
             
             sendBtn.disabled = true;
@@ -480,15 +557,95 @@
             updateCharCount();
             adjustTextareaHeight();
             
-            // Lancer la réponse IA
-            simulateAIResponse(message);
+            // Afficher l'indicateur de frappe
+            showTyping();
+            aiMessageElement = null;
             
-            // Réactiver le bouton après un délai
-            setTimeout(() => {
+            // Vérifier que le chat existe et a un dbId
+            const currentChat = chats[currentChatId];
+            if (!currentChat || !currentChat.dbId) {
+                console.error('Chat ou dbId manquant:', currentChat);
+                hideTyping();
+                addMessageToUI("❌ Erreur: Conversation invalide.", false);
                 sendBtn.disabled = false;
-            }, 2000);
+                return;
+            }
+            
+            // Envoi réel à l'API backend
+            const payload = {
+                prompt: message,
+                model: 'phi3:mini',
+                userMessage: message,
+                conversation_id: currentChat.dbId
+            };
+
+            try {
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP: ${response.status}`);
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+                let fullResponse = '';
+
+                function read() {
+                    return reader.read().then(({ done, value }) => {
+                        if (done) {
+                            hideTyping();
+                            
+                            // Sauvegarder la réponse complète dans l'historique local
+                            if (currentChatId && fullResponse) {
+                                chats[currentChatId].messages.push({
+                                    content: fullResponse,
+                                    isUser: false,
+                                    timestamp: new Date()
+                                });
+                            }
+                            
+                            aiMessageElement = null;
+                            return;
+                        }
+
+                        buffer += decoder.decode(value, { stream: true });
+                        const lines = buffer.split('\n');
+                        buffer = lines.pop();
+
+                        for (const line of lines) {
+                            if (line.trim()) {
+                                try {
+                                    const json = JSON.parse(line);
+                                    if (json.response) {
+                                        fullResponse += json.response;
+                                        updateAIMessage(fullResponse);
+                                    }
+                                } catch (e) {
+                                    console.warn("Ligne invalide JSON:", line);
+                                }
+                            }
+                        }
+
+                        return read();
+                    });
+                }
+
+                await read();
+
+            } catch (error) {
+                console.error('Erreur IA:', error);
+                hideTyping();
+                addMessageToUI(`❌ Erreur de connexion: ${error.message}`, false);
+            } finally {
+                sendBtn.disabled = false;
+            }
         }
-        
+
         function updateCharCount() {
             const count = messageInput.value.length;
             charCount.textContent = `${count}/2000`;
