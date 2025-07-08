@@ -416,8 +416,8 @@
                 hour: '2-digit', 
                 minute: '2-digit' 
             });
-            
             if (isUser) {
+                console.log("Utilisateur connecté :", loggedInUser);
                 messageDiv.innerHTML = `
                     <div class="message-user rounded-2xl p-4 shadow-sm">
                         <div class="flex items-start space-x-3">
@@ -431,7 +431,9 @@
                                 <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                                 </svg>
+                                
                             </div>
+                            <p class="text-white text-sm font-medium" style="border-top-width: 0px; margin-top: 5.5px; margin-left: 4px;">${loggedInUser}</p>
                         </div>
                     </div>
                 `;
