@@ -69,20 +69,6 @@ Après tests :
 
 ---
 
-## 🧪 Update 7 Juillet – Serveur & Interface Web
-
-- Intégration d’un **serveur local avec Flask (Python)** pour combiner front et IA.
-- Problème : la génération de réponse est **plus lente via interface** que via terminal.
-- Test du modèle **phi3:mini (Microsoft)** : bien plus fluide sur interface web.
-
-### ✅ Interface Web (Prototype)
-
-- Authentification (login, register)
-- Design respectant la **charte graphique** de l’entreprise
-- Page **404 personnalisée**
-
----
-
 ## 🧠 Observations & Limitations
 
 - En l’absence de **GPU**, la limite optimale reste autour de **1.5B à 4B**.
@@ -106,11 +92,47 @@ Après tests :
 
 ## 🛠️ Stack technique
 
-- **Modèles LLM quantisés** (GGUF) : via llama.cpp / Ollama
+- **Modèles LLM quantisés** (GGUF) : via Ollama
 - **Interface Web** : HTML/CSS Tailwind + Flask
 - **Backend local** : Python + serveur local (llama-server / Ollama)
 
 ---
+
+## 🧪 Update 7 Juillet – Serveur & Interface Web
+
+- Intégration d’un **serveur local avec Flask (Python)** pour combiner front et IA.
+- Problème : la génération de réponse est **plus lente via interface** que via terminal.
+- Test du modèle **phi3:mini (Microsoft)** : bien plus fluide sur interface web.
+
+### ✅ Interface Web (Prototype)
+
+- Authentification (login, register)
+- Design respectant la **charte graphique** de l’entreprise
+- Page **404 personnalisée**
+- Début de l'interface racine (/) (Interface de test sans style)
+
+---
+
+## 🧪 Update 8 Juillet – Serveur & Interface Web Améliorations
+
+- Amélioration des performances d'Ollama afin de tourner correctement avec le serveur.
+- L'interface **racine** a bien commencé, la base **Front** est presque complète, la partie **Back** est en cours.
+- Création d'une base de donnée Locale Python via **Sqlite** 
+- Réflexion sur l'historique des conversations.
+
+---
+
+## 🧪 Update 9 Juillet – Interface + DB + Historique des conversations
+
+- Recalibrage de la position des éléments sur l'interface d'interaction avec l'IA pour une meilleure expérience utilisateur.
+- La date de création de la conversation est affichée sur la page, une configuration du fuseau horaire a été nécessaire afin d'avoir un résultat cohérent.
+- L'historique a été créé, les conversations ainsi que leurs contenus sont enregistrés sur la base de donnée (**users.db**).
+- La suppression des conversations est également disponible.
+- Réflexion sur la façon de remettre en contexte l'IA par rapport à la discussion (en cours)
+- Possibilité de renommer sa discussion (en cours)
+
+---
+
 
 ## 📚 Auteur
 
