@@ -111,6 +111,11 @@
 
             // Focus sur l'input
             messageInput.focus();
+
+            // Initialiser highlight.js
+            if (typeof hljs !== 'undefined') {
+                hljs.highlightAll();
+            }
         });
 
 
@@ -501,8 +506,8 @@
                             </div>
                             <div>
                                 <p class="font-medium text-slate-800 mb-1">Assistant CouachGPT</p>
-                                <div class="text-slate-700">
-                                    <p>${message}</p>
+                                <div class="text-slate-700 ai-response-content">
+                                    ${formatMarkdown(message)}
                                 </div>
                                 <span class="text-xs text-slate-500 mt-2 block">${timestamp}</span>
                             </div>
@@ -557,8 +562,7 @@
                             </div>
                             <div>
                                 <p class="font-medium text-slate-800 mb-1">Assistant CouachGPT</p>
-                                <div class="text-slate-700">
-                                    <p class="ai-response-text"></p>
+                                <div class="text-slate-700 ai-response-content">
                                 </div>
                                 <span class="text-xs text-slate-500 mt-2 block">${timestamp}</span>
                             </div>
@@ -572,10 +576,11 @@
                     messagesContainer.appendChild(messageDiv);
                 }
                 
-                aiMessageElement = messageDiv.querySelector('.ai-response-text');
+                aiMessageElement = messageDiv.querySelector('.ai-response-content');
             }
             
-            aiMessageElement.textContent = text;
+            // Formatter le texte avec markdown
+            aiMessageElement.innerHTML = formatMarkdown(text);
             scrollToBottom();
         }
         
@@ -699,6 +704,33 @@
             } finally {
                 sendBtn.disabled = false;
             }
+        }
+
+        function formatMarkdown(text) {
+            // Configuration de marked
+            marked.setOptions({
+                highlight: function(code, lang) {
+                    if (lang && hljs.getLanguage(lang)) {
+                        try {
+                            return hljs.highlight(code, { language: lang }).value;
+                        } catch (err) {}
+                    }
+                    return hljs.highlightAuto(code).value;
+                },
+                breaks: true,
+                gfm: true
+            });
+
+            // Convertir le markdown en HTML
+            let html = marked.parse(text);
+            
+            // Ajouter les en-têtes de langue pour les blocs de code
+            html = html.replace(/<pre><code class="language-(\w+)">/g, 
+                '<div class="code-block"><div class="code-header">$1</div><pre><code class="language-$1">');
+            
+            html = html.replace(/<\/code><\/pre>/g, '</code></pre></div>');
+            
+            return html;
         }
 
         function updateCharCount() {

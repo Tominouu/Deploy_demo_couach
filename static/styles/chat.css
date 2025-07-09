@@ -156,3 +156,105 @@
         ::-webkit-scrollbar-thumb:hover {
             background: rgba(51, 65, 85, 0.7);
         }
+
+        /* Styles pour les blocs de code */
+.message-ai pre {
+    background: #2d3748;
+    border-radius: 8px;
+    padding: 16px;
+    margin: 12px 0;
+    overflow-x: auto;
+    border: 1px solid #4a5568;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.message-ai pre code {
+    background: none;
+    padding: 0;
+    border-radius: 0;
+    font-family: 'Fira Code', 'Consolas', 'Monaco', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #e2e8f0;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+.message-ai code {
+    background: #f1f5f9;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Fira Code', 'Consolas', 'Monaco', monospace;
+    font-size: 0.9em;
+    color: #e53e3e;
+    word-break: break-word;
+}
+
+.message-ai .code-header {
+    background: #1a202c;
+    color: #a0aec0;
+    padding: 8px 16px;
+    border-radius: 8px 8px 0 0;
+    font-size: 12px;
+    font-weight: 500;
+    border-bottom: 1px solid #4a5568;
+}
+
+.message-ai .code-block {
+    position: relative;
+    margin: 12px 0;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.message-ai .code-block pre {
+    margin: 0;
+    border-radius: 0 0 8px 8px;
+}
+
+/* Styles pour le texte formaté */
+.message-ai .ai-response-content {
+    line-height: 1.6;
+}
+
+.message-ai .ai-response-content p {
+    margin: 8px 0;
+}
+
+.message-ai .ai-response-content ul,
+.message-ai .ai-response-content ol {
+    margin: 8px 0;
+    padding-left: 20px;
+}
+
+.message-ai .ai-response-content li {
+    margin: 4px 0;
+}
+
+.message-ai .ai-response-content h1,
+.message-ai .ai-response-content h2,
+.message-ai .ai-response-content h3 {
+    font-weight: 600;
+    margin: 16px 0 8px 0;
+}
+
+.message-ai .ai-response-content h1 {
+    font-size: 1.25em;
+}
+
+.message-ai .ai-response-content h2 {
+    font-size: 1.1em;
+}
+
+.message-ai .ai-response-content h3 {
+    font-size: 1em;
+}
+
+.message-ai .ai-response-content blockquote {
+    border-left: 4px solid #e2e8f0;
+    padding-left: 16px;
+    margin: 12px 0;
+    font-style: italic;
+    color: #64748b;
+}
