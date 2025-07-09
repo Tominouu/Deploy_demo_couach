@@ -102,7 +102,7 @@ def ask():
                     c.execute('''
                         INSERT INTO history (conversation_id, prompt, response, timestamp)
                         VALUES (?, ?, ?, ?)
-                    ''', (conversation_id, message, full_response, datetime.datetime.now()))
+                    ''', (conversation_id, message, full_response, datetime.datetime.now(ZoneInfo("Europe/Paris"))))  #ici pour la date on doit spécifier le fuseau horaire
                     conn.commit()
                     conn.close()
                 except Exception as e:
