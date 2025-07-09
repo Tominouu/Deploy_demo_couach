@@ -69,20 +69,6 @@ Après tests :
 
 ---
 
-## 🧪 Update 7 Juillet – Serveur & Interface Web
-
-- Intégration d’un **serveur local avec Flask (Python)** pour combiner front et IA.
-- Problème : la génération de réponse est **plus lente via interface** que via terminal.
-- Test du modèle **phi3:mini (Microsoft)** : bien plus fluide sur interface web.
-
-### ✅ Interface Web (Prototype)
-
-- Authentification (login, register)
-- Design respectant la **charte graphique** de l’entreprise
-- Page **404 personnalisée**
-
----
-
 ## 🧠 Observations & Limitations
 
 - En l’absence de **GPU**, la limite optimale reste autour de **1.5B à 4B**.
@@ -111,6 +97,21 @@ Après tests :
 - **Backend local** : Python + serveur local (llama-server / Ollama)
 
 ---
+
+## 🧪 Update 7 Juillet – Serveur & Interface Web
+
+- Intégration d’un **serveur local avec Flask (Python)** pour combiner front et IA.
+- Problème : la génération de réponse est **plus lente via interface** que via terminal.
+- Test du modèle **phi3:mini (Microsoft)** : bien plus fluide sur interface web.
+
+### ✅ Interface Web (Prototype)
+
+- Authentification (login, register)
+- Design respectant la **charte graphique** de l’entreprise
+- Page **404 personnalisée**
+
+---
+
 
 ## 📚 Auteur
 
