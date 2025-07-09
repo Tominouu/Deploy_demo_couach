@@ -321,9 +321,12 @@ def register():
         c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
         conn.commit()
         conn.close()
+        # Afficher la popup de succès sur la page de login
+        return render_template('login.html', success="Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter.")
     except sqlite3.IntegrityError:
-        flash("Nom d'utilisateur déjà pris", "error") 
-    return redirect('/login')
+        # Afficher la popup personnalisée sur la page de login
+        return render_template('login.html', error="Nom d'utilisateur déjà pris")
+    #return redirect('/login')
 
 @app.route('/test', methods=['GET', 'POST'])
 def test():
