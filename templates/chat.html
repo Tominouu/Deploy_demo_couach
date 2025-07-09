@@ -53,7 +53,16 @@
                 <div id="userDetails">
                     <p class="text-white text-sm font-medium">{{user}}</p>
                     <p class="text-white/60 text-xs">En ligne</p>
+                    
                 </div>
+                <button title="Déconnexion" onclick="location.href='{{ url_for('logout') }}'" class="ml-2 p-1 rounded text-white/60 hover:text-red-400 p-1" style="margin-left: 160px; margin-top: 5px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="white" stroke-width="2" 
+                            stroke-linecap="round" stroke-linejoin="round" class="feather feather-log-out">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" y1="12" x2="9" y2="12" />
+                        </svg>
+                    </button>
             </div>
         </div>
     </div>
