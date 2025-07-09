@@ -279,26 +279,40 @@
         async function deleteChat(chatId) {
             if (confirm('Êtes-vous sûr de vouloir supprimer cette conversation ?')) {
                 const chat = chats[chatId];
-                
-                // Optionnel : supprimer aussi de la base de données
+
+                // Appeler le bon endpoint Flask
                 try {
-                    await fetch(`/conversation/${chat.dbId}`, {
-                        method: 'DELETE'
+                    const response = await fetch(`/delete_conversation/${chat.dbId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
                     });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        // Supprimer localement
+                        delete chats[chatId];
+                        document.querySelector(`[data-chat-id="${chatId}"]`).remove();
+
+                        if (currentChatId === chatId) {
+                            currentChatId = null;
+                            clearMessages();
+                            addWelcomeMessage();
+                        }
+                    } else {
+                        console.error('Erreur serveur:', result.error || 'Suppression impossible');
+                        alert('Une erreur est survenue lors de la suppression.');
+                    }
+
                 } catch (error) {
-                    console.error('Erreur lors de la suppression:', error);
-                }
-                
-                delete chats[chatId];
-                document.querySelector(`[data-chat-id="${chatId}"]`).remove();
-                
-                if (currentChatId === chatId) {
-                    currentChatId = null;
-                    clearMessages();
-                    addWelcomeMessage();
+                    console.error('Erreur réseau lors de la suppression:', error);
+                    alert('Erreur réseau : impossible de supprimer la conversation.');
                 }
             }
         }
+
 
         async function loadChatMessages(chatId) {
             clearMessages();
@@ -392,7 +406,7 @@
                                     <p>Bonjour ! Je suis votre assistant CouachGPT</p>
                                     <p class="mt-2">Je peux vous aider avec :</p>
                                     <ul class="mt-2 space-y-1 text-sm">
-                                        <li>• Développement web</li>
+                                        <li>• Développement de dispositifs</li>
                                         <li>• Conseils de programmation</li>
                                         <li>• Services informatiques</li>
                                         <li>• Maintenance et support technique</li>
@@ -447,7 +461,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <p class="font-medium text-slate-800 mb-1">Assistant Couach IA</p>
+                                <p class="font-medium text-slate-800 mb-1">Assistant CouachGPT</p>
                                 <div class="text-slate-700">
                                     <p>${message}</p>
                                 </div>
@@ -503,7 +517,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <p class="font-medium text-slate-800 mb-1">Assistant Couach IA</p>
+                                <p class="font-medium text-slate-800 mb-1">Assistant CouachGPT</p>
                                 <div class="text-slate-700">
                                     <p class="ai-response-text"></p>
                                 </div>

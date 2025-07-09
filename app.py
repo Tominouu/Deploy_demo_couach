@@ -18,6 +18,7 @@ def init_db():
     c = conn.cursor()
 
     #c.execute('DROP TABLE conversations')
+    #c.execute('DROP TABLE history')
     
     # Table users
     c.execute('''CREATE TABLE IF NOT EXISTS users (
@@ -58,7 +59,7 @@ def save_history(conversation_id, prompt, response):
     c.execute('''
         INSERT INTO history (conversation_id, prompt, response, timestamp)
         VALUES (?, ?, ?, ?)
-    ''', (conversation_id, prompt, response, datetime.datetime.now()))
+    ''', (conversation_id, prompt, response, datetime.datetime.now(ZoneInfo("Europe/Paris")))) 
     conn.commit()
     conn.close()
 
@@ -142,7 +143,8 @@ def create_or_select_conversation():
 
         conn = sqlite3.connect('users.db')  # Même base que les utilisateurs
         c = conn.cursor()
-        c.execute('INSERT INTO conversations (user, title) VALUES (?, ?)', (user, title))
+        now_paris = datetime.datetime.now(ZoneInfo("Europe/Paris"))
+        c.execute('INSERT INTO conversations (user, title, created_at) VALUES (?, ?, ?)', (user, title, now_paris))
         conversation_id = c.lastrowid
         conn.commit()
         conn.close()
@@ -210,6 +212,40 @@ def get_conversation_history(conversation_id):
     except Exception as e:
         print(f"Erreur lors du chargement de l'historique: {e}")
         return jsonify([])
+    
+@app.route('/delete_conversation/<int:conversation_id>', methods=['POST'])
+def delete_conversation(conversation_id):
+    user = session.get('user')
+    if not user:
+        return jsonify({'error': 'Utilisateur non connecté'}), 403
+
+    try:
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        
+        # Vérifier que la conversation appartient à l'utilisateur
+        c.execute('SELECT user FROM conversations WHERE id = ?', (conversation_id,))
+        conv_user = c.fetchone()
+        
+        if not conv_user or conv_user[0] != user:
+            return jsonify({'error': 'Conversation non trouvée'}), 404
+        
+        # Supprimer la conversation et son historique
+        c.execute('DELETE FROM history WHERE conversation_id = ?', (conversation_id,))
+        c.execute('DELETE FROM conversations WHERE id = ?', (conversation_id,))
+        conn.commit()
+        conn.close()
+
+        return jsonify({'success': True})
+    
+    except Exception as e:
+        print(f"Erreur lors de la suppression de la conversation: {e}")
+        return jsonify({'error': 'Erreur serveur'}), 500
+    
+@app.route('/logout')
+def logout():
+    session.pop('user', None)
+    return redirect('/login')
 
 @app.route('/')
 def chat():
