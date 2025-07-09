@@ -233,13 +233,26 @@
             const chatItem = document.createElement('div');
             chatItem.className = 'chat-item p-3 rounded-lg text-white text-sm';
             chatItem.dataset.chatId = chatId;
+            let timestamp = '';
+            if (chats[chatId] && chats[chatId].createdAt) {
+                const date = chats[chatId].createdAt;
+                const jours = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+                const mois = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+                const heure = date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+                timestamp = `${jours[date.getDay()]} ${date.getDate()} ${mois[date.getMonth()]} ${date.getFullYear()} | ${heure}`;
+            }
             
             chatItem.innerHTML = `
                 <div class="flex items-center justify-between">
                     <div class="flex-1 truncate">
                         <p class="font-medium truncate">${title}</p>
-                        <p class="text-white/60 text-xs">Aujourd'hui</p>
+                        <p class="text-white/60 text-xs">${timestamp}</p>
                     </div>
+                    <button class="edit-chat text-white/60 hover:text-blue-400 p-1 mr-2" data-chat-id="${chatId}" style="margin-top: 1px;">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.862 3.487a2.25 2.25 0 113.182 3.182l-10.61 10.61a2 2 0 01-.708.444l-3.11 1.11a.5.5 0 01-.64-.64l1.11-3.11a2 2 0 01.444-.708l10.61-10.61z"></path>
+                        </svg>
+                    </button>
                     <button class="delete-chat text-white/60 hover:text-red-400 p-1" data-chat-id="${chatId}">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
@@ -257,6 +270,32 @@
             chatItem.querySelector('.delete-chat').addEventListener('click', (e) => {
                 e.stopPropagation();
                 deleteChat(chatId);
+            });
+
+            chatItem.addEventListener('click', (e) => {
+                if (!e.target.closest('.edit-chat')) {
+                    switchToChat(chatId);
+                }
+            });
+
+            chatItem.querySelector('.edit-chat').addEventListener('click', (e) => {
+                e.stopPropagation();
+                const newTitle = prompt('Modifier le titre de la conversation:', title);
+                if (newTitle && newTitle.trim() !== '') {
+                    chats[chatId].title = newTitle.trim();
+                    chatItem.querySelector('p').textContent = newTitle;
+                    // Mettre à jour le titre dans la base de données
+                    fetch(`/update_conversation/${chats[chatId].dbId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ title: newTitle.trim() })
+                    }).catch(error => {
+                        console.error('Erreur lors de la mise à jour du titre:', error);
+                        alert('Erreur lors de la mise à jour du titre de la conversation.');
+                    });
+                }
             });
             
             chatHistory.appendChild(chatItem);

@@ -242,6 +242,37 @@ def delete_conversation(conversation_id):
         print(f"Erreur lors de la suppression de la conversation: {e}")
         return jsonify({'error': 'Erreur serveur'}), 500
     
+@app.route('/update_conversation/<int:conversation_id>', methods=['POST'])
+def update_conversation(conversation_id):
+    user = session.get('user')
+    if not user:
+        return jsonify({'error': 'Utilisateur non connecté'}), 403
+
+    try:
+        data = request.get_json()
+        new_title = data.get('title')
+
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        
+        # Vérifier que la conversation appartient à l'utilisateur
+        c.execute('SELECT user FROM conversations WHERE id = ?', (conversation_id,))
+        conv_user = c.fetchone()
+        
+        if not conv_user or conv_user[0] != user:
+            return jsonify({'error': 'Conversation non trouvée'}), 404
+        
+        # Mettre à jour le titre de la conversation
+        c.execute('UPDATE conversations SET title = ? WHERE id = ?', (new_title, conversation_id))
+        conn.commit()
+        conn.close()
+
+        return jsonify({'success': True})
+    
+    except Exception as e:
+        print(f"Erreur lors de la mise à jour de la conversation: {e}")
+        return jsonify({'error': 'Erreur serveur'}), 500
+    
 @app.route('/logout')
 def logout():
     session.pop('user', None)
