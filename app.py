@@ -4,6 +4,7 @@ import sqlite3
 import requests
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import timedelta
+from zoneinfo import ZoneInfo
 import datetime
 import random
 
@@ -266,5 +267,6 @@ def page_not_found(e):
     return render_template('404.html'), 404
 
 if __name__ =='__main__':
+    print(datetime.datetime.now(ZoneInfo("Europe/Paris")))
     init_db()
     app.run(host='0.0.0.0', port=8080)

@@ -412,10 +412,10 @@
             const messageDiv = document.createElement('div');
             messageDiv.className = `chat-message${animate ? '' : ' opacity-100'}`;
             
-            const timestamp = new Date().toLocaleTimeString('fr-FR', { 
+            const timestamp = chats[currentChatId].createdAt.toLocaleTimeString('fr-FR', { 
                 hour: '2-digit', 
                 minute: '2-digit' 
-            });
+            }); 
             if (isUser) {
                 console.log("Utilisateur connecté :", loggedInUser);
                 messageDiv.innerHTML = `
