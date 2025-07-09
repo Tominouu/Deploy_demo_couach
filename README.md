@@ -109,6 +109,27 @@ Après tests :
 - Authentification (login, register)
 - Design respectant la **charte graphique** de l’entreprise
 - Page **404 personnalisée**
+- Début de l'interface racine (/) (Interface de test sans style)
+
+---
+
+## 🧪 Update 8 Juillet – Serveur & Interface Web Améliorations
+
+- Amélioration des performances d'Ollama afin de tourner correctement avec le serveur.
+- L'interface **racine** a bien commencé, la base **Front** est presque complète, la partie **Back** est en cours.
+- Création d'une base de donnée Locale Python via **Sqlite** 
+- Réflexion sur l'historique des conversations.
+
+---
+
+## 🧪 Update 9 Juillet – Interface + DB + Historique des conversations
+
+- Recalibrage de la position des éléments sur l'interface d'interaction avec l'IA pour une meilleure expérience utilisateur.
+- La date de création de la conversation est affichée sur la page, une configuration du fuseau horaire a été nécessaire afin d'avoir un résultat cohérent.
+- L'historique a été créé, les conversations ainsi que leurs contenus sont enregistrés sur la base de donnée (**users.db**).
+- La suppression des conversations est également disponible.
+- Réflexion sur la façon de remettre en contexte l'IA par rapport à la discussion (en cours)
+- Possibilité de renommer sa discussion (en cours)
 
 ---
 
