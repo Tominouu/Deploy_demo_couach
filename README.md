@@ -106,7 +106,7 @@ Après tests :
 
 ## 🛠️ Stack technique
 
-- **Modèles LLM quantisés** (GGUF) : via llama.cpp / Ollama
+- **Modèles LLM quantisés** (GGUF) : via Ollama
 - **Interface Web** : HTML/CSS Tailwind + Flask
 - **Backend local** : Python + serveur local (llama-server / Ollama)
 
