@@ -6,6 +6,31 @@ Ce projet a pour but de **tester, comparer et intégrer différents modèles LLM
 
 ---
 
+### ⚠️ SI L'IA NE RÉPOND PLUS VOICI LA DÉMARCHE À SUIVRE
+
+- Se connecter en **ssh** à la machine virtuelle:
+ `ssh couachgpt@172.16.2.81` 
+- Une fois dedans, tapez la commande suivante pour vérifier que le **modèle** n'a pas été **supprimé**:
+ `ollama ls`
+- Il devrait retourner, le nom des modèles présents.
+- Si ce n'est pas le cas:
+ `ollama run <nomdumodele>`
+- Il va l'installer et ensuite le lancer automatiquement.
+- Si le modèle est bien installé, pour le redémarrer faites la même commande que celle citée ci-dessus.
+- Vous souhaitez arrêter le modèle, appuyez sur `Ctrl + D` ou tapez `/bye` dans la console.
+
+### ⚠️ SI LA PAGE WEB NE REPOND PLUS
+
+- Se connecter également en **ssh** comme il est indiqué plus haut
+- Se rendre dans le **dossier** couachgpt: 
+ `cd couachgpt`
+- Ensuite tapez:
+ `python app.py`
+- C'est censé avoir lancé le serveur, si jamais il vous dit que le port est déjà pris, alors le serveur est déjà lancé.
+- Si jamais vous êtes sur que le serveur est lancé et que la page n'est pas accessible, vérifiez les règles **NAT** du serveur, que les ports autorisés sur la **VM**:
+ `sudo ufw allow 8080`
+
+
 ## 🔬 Phase de Recherche & Benchmarks (1–4 Juillet)
 
 ### 🖥️ Configuration Matérielle Testée
@@ -37,7 +62,7 @@ Ce projet a pour but de **tester, comparer et intégrer différents modèles LLM
 | `gemma3:4b`              | 3.3 Go   | 8 min 35  | ❌       | 99 %   | 52 %   |
 | `deepseek-r1:1.5b`       | 1.1 Go   | 3 min 30  | ✅       | 99 %   | 21 %   |
 | `mistral`                | 4.0 Go   | 4 min     | ✅       | 100 %  | 62 %   |
-| `deepseek-coder:6.7b`    | 3.8 Go   | 6 min 18  | 🟡 Réserve | 100 %  | 74 %   |
+| `deepseek-coder:6.7b`    | 3.8 Go   | 6 min 18  | ❌       | 100 %  | 74 %   |
 
 ---
 
@@ -98,20 +123,24 @@ Après tests :
 
 ---
 
+## 🧪 Update 5-6 Juillet – Tests des Modèles
+
+- Tests des différents **modèles** retenus directement sur l'interface web **minimale**.
+
+---
+
 ## 🧪 Update 7 Juillet – Serveur & Interface Web
 
 - Intégration d’un **serveur local avec Flask (Python)** pour combiner front et IA.
 - Problème : la génération de réponse est **plus lente via interface** que via terminal.
 - Test du modèle **phi3:mini (Microsoft)** : bien plus fluide sur interface web.
-
-### ✅ Interface Web (Prototype)
-
 - Authentification (login, register)
 - Design respectant la **charte graphique** de l’entreprise
 - Page **404 personnalisée**
 - Début de l'interface racine (/) (Interface de test sans style)
 
 ---
+
 
 ## 🧪 Update 8 Juillet – Serveur & Interface Web Améliorations
 
@@ -124,14 +153,26 @@ Après tests :
 
 ## 🧪 Update 9 Juillet – Interface + DB + Historique des conversations
 
-- Recalibrage de la position des éléments sur l'interface d'interaction avec l'IA pour une meilleure expérience utilisateur.
-- La date de création de la conversation est affichée sur la page, une configuration du fuseau horaire a été nécessaire afin d'avoir un résultat cohérent.
-- L'historique a été créé, les conversations ainsi que leurs contenus sont enregistrés sur la base de donnée (**users.db**).
-- La suppression des conversations est également disponible.
-- Réflexion sur la façon de remettre en contexte l'IA par rapport à la discussion (en cours)
-- Possibilité de renommer sa discussion (en cours)
+- Recalibrage de la **position** des éléments sur l'interface d'interaction avec **l'IA** pour une **meilleure expérience utilisateur.**
+- La **date de création** de la conversation est affichée sur la **page**, une configuration du **fuseau horaire** a été nécessaire afin d'avoir un résultat **cohérent**.
+- L'historique a été créé, les **conversations** ainsi que leurs contenus sont enregistrés sur la base de donnée (**users.db**).
+- La **suppression** des **conversations** est également **disponible.**
+- **Réflexion** sur la façon de remettre en **contexte** l'IA par rapport à la **discussion** (en cours)
+- Possibilité de **renommer** sa **discussion**
+- Ajout du **Logout** (route + bouton)
+- Les **Alertes** sont maintenant disponibles sur la page de connexion (Erreurs affichées: Contraintes d'intégrité)
+- Ajout de la **compatibilité formatage**, lecture du **Markdown**, affichage propre du **code**, **librairies** utilisées: **Marked.js** et **Highlight.js**
 
 ---
+
+## 🧪 Update 10 Juillet – Confort expérience utilisateur
+
+- Ajout d'une popup personnalisée pour le **Delete** et le **Edit**.
+- Clé **ssh** active pour **commit & push**, gain de temps considérable
+- Début du **responsive** pour mobile
+- **Correction** du bug de la **Sidebar** qui n'était plus active, mode **plein écran** disponible
+
+
 
 
 ## 📚 Auteur
