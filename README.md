@@ -103,9 +103,6 @@ Après tests :
 - Intégration d’un **serveur local avec Flask (Python)** pour combiner front et IA.
 - Problème : la génération de réponse est **plus lente via interface** que via terminal.
 - Test du modèle **phi3:mini (Microsoft)** : bien plus fluide sur interface web.
-
-### ✅ Interface Web (Prototype)
-
 - Authentification (login, register)
 - Design respectant la **charte graphique** de l’entreprise
 - Page **404 personnalisée**
@@ -124,14 +121,24 @@ Après tests :
 
 ## 🧪 Update 9 Juillet – Interface + DB + Historique des conversations
 
-- Recalibrage de la position des éléments sur l'interface d'interaction avec l'IA pour une meilleure expérience utilisateur.
-- La date de création de la conversation est affichée sur la page, une configuration du fuseau horaire a été nécessaire afin d'avoir un résultat cohérent.
-- L'historique a été créé, les conversations ainsi que leurs contenus sont enregistrés sur la base de donnée (**users.db**).
-- La suppression des conversations est également disponible.
-- Réflexion sur la façon de remettre en contexte l'IA par rapport à la discussion (en cours)
-- Possibilité de renommer sa discussion (en cours)
+- Recalibrage de la **position** des éléments sur l'interface d'interaction avec **l'IA** pour une **meilleure expérience utilisateur.**
+- La **date de création** de la conversation est affichée sur la **page**, une configuration du **fuseau horaire** a été nécessaire afin d'avoir un résultat **cohérent**.
+- L'historique a été créé, les **conversations** ainsi que leurs contenus sont enregistrés sur la base de donnée (**users.db**).
+- La **suppression** des **conversations** est également **disponible.**
+- **Réflexion** sur la façon de remettre en **contexte** l'IA par rapport à la **discussion** (en cours)
+- Possibilité de **renommer** sa **discussion**
+- Ajout du **Logout** (route + bouton)
+- Les **Alertes** sont maintenant disponibles sur la page de connexion (Erreurs affichées: Contraintes d'intégrité)
+- Ajout de la **compatibilité formatage**, lecture du **Markdown**, affichage propre du **code**, **librairies** utilisées: **Marked.js** et **Highlight.js**
 
 ---
+
+## 🧪 Update 10 Juillet – Confort expérience utilisateur
+
+- Ajout d'une popup personnalisée pour le **Delete** et le **Edit**.
+- Clé **ssh** active pour **commit & push**, gain de temps considérable
+- Début du **responsive** pour mobile
+- **Correction** du bug de la **Sidebar** qui n'était plus active, mode **plein écran** disponible
 
 
 ## 📚 Auteur
