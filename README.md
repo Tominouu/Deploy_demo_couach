@@ -27,7 +27,7 @@ Ce projet a pour but de **tester, comparer et intégrer différents modèles LLM
 
 ### ⚠️ SI LA PAGE WEB NE REPOND PLUS
 
-- Se connecter également en **ssh** comme il est indiqué plus haut
+- Se connecter également en **ssh** comme il est indiqué plus haut.
 - Se rendre dans le **dossier** couachgpt: 
  `cd couachgpt`
 - Ensuite tapez:
