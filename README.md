@@ -27,12 +27,6 @@ Ce projet a pour but de **tester, comparer et intégrer différents modèles LLM
 
 ### ⚠️ SI LA PAGE WEB NE REPOND PLUS
 
-## Méthode Simple:
-
-- Connectez vous sur cette page, http://172.16.2.81:8294/admin, si vous avez un accès refusé changez de **compte** (passez sur le **admin**), depuis le **panel** vous pourrez **redémarrer** les différents **services**.
-
-## Méthode Manuelle:
-
 - Se connecter également en **ssh** comme il est indiqué plus haut
 - Se rendre dans le **dossier** couachgpt: 
  `cd couachgpt`
