@@ -12,6 +12,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
 </head>
 <body class="yacht-hero h-screen flex overflow-hidden">
+    <!-- Bouton hamburger mobile -->
+    <button id="mobileSidebarBtn" class="fixed top-4 left-4 z-50 bg-white/80 rounded-full p-2 shadow-lg md:hidden" style="display: block;">
+        <svg class="w-7 h-7 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+    </button>
     <!-- sidebar historique des chats -->
     <div id="sidebar" class="sidebar glass-dark flex flex-col">
         <!-- sidebar en haut -->
@@ -73,19 +79,17 @@
     <!-- Zone de chat principale -->
     <div class="flex-1 flex flex-col">
         <!-- Header principal -->
-        <div class="glass-effect p-4 border-b border-gray-200">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-xl font-semibold text-gray-800">Assistant IA</h1>
-                    <p class="text-sm text-gray-600">Chantier Naval de Couach</p>
-                </div>
-                <div class="flex items-center space-x-3">
-                    <div class="flex items-center space-x-2 text-sm text-gray-600">
-                        <div class="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <span>IA connectée</span>
-                    </div>
-                </div>
+        <div class="glass-effect p-4 border-b border-gray-200 flex items-center justify-between">
+            <div>
+                <h1 class="text-xl font-semibold text-gray-800">Assistant IA</h1>
+                <p class="text-sm text-gray-600">Chantier Naval de Couach</p>
             </div>
+            <!-- Bouton hamburger pour masquer la sidebar sur mobile -->
+            <button id="closeSidebarBtn" class="md:hidden bg-white/80 rounded-full p-2 shadow-lg" style="display: none;">
+                <svg class="w-7 h-7 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
         </div>
         
         <!-- Zone des messages -->
@@ -147,9 +151,39 @@
     document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("username").textContent = loggedInUser;
     });
-  </script>
+    </script>
+    <script>
+    // Responsive sidebar mobile
+    const sidebar = document.getElementById('sidebar');
+    const mobileSidebarBtn = document.getElementById('mobileSidebarBtn');
+    const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+    
+    function openSidebar() {
+        sidebar.classList.add('active');
+        sidebar.style.transform = 'translateX(0)';
+        closeSidebarBtn.style.display = 'block';
+    }
+    function closeSidebar() {
+        sidebar.classList.remove('active');
+        sidebar.style.transform = '';
+        closeSidebarBtn.style.display = 'none';
+    }
+    if (mobileSidebarBtn) {
+        mobileSidebarBtn.addEventListener('click', openSidebar);
+    }
+    if (closeSidebarBtn) {
+        closeSidebarBtn.addEventListener('click', closeSidebar);
+    }
+    // Fermer la sidebar si on clique en dehors sur mobile
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) {
+            sidebar.classList.remove('active');
+            sidebar.style.transform = '';
+            closeSidebarBtn.style.display = 'none';
+        }
+    });
+    </script>
 </body>
 </html>
 
-        
-        
+
