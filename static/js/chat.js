@@ -215,24 +215,6 @@
             }
         }
 
-
-
-
-         //function createNewChat() {
-            //chatCounter++;
-            //const chatId = `chat-${chatCounter}`;
-            //const chatTitle = `Conversation ${chatCounter}`;
-            
-           // chats[chatId] = {
-                //id: chatId,
-                //title: chatTitle,
-                //messages: [],
-                //createdAt: new Date()
-           // };
-            
-            //addChatToHistory(chatId, chatTitle);
-            //switchToChat(chatId);
-        //}
         
         function addChatToHistory(chatId, title) {
             const chatItem = document.createElement('div');
