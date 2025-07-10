@@ -343,7 +343,7 @@
                     </svg>
                     <span class="font-semibold text-lg">Supprimer la conversation ?</span>
                 </div>
-                <p class="mb-6 text-slate-300">Êtes-vous sûr de vouloir supprimer cette conversation ? Cette action est irréversible</p>
+                <p class="mb-6 text-slate-300">Êtes-vous sûr de vouloir supprimer cette conversation ? Cette action est irréversible.</p>
                 <div class="flex justify-end space-x-2">
                     <button id="cancelDelete" class="px-4 py-2 rounded bg-slate-600 hover:bg-slate-700 text-white">Annuler</button>
                     <button id="confirmDelete" class="px-4 py-2 rounded bg-red-500 hover:bg-red-600 text-white">Supprimer</button>
