@@ -228,7 +228,7 @@
                 const heure = date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
                 timestamp = `${jours[date.getDay()]} ${date.getDate()} ${mois[date.getMonth()]} ${date.getFullYear()} | ${heure}`;
             }
-            
+
             chatItem.innerHTML = `
                 <div class="flex items-center justify-between">
                     <div class="flex-1 truncate">
@@ -247,44 +247,89 @@
                     </button>
                 </div>
             `;
-            
+
             chatItem.addEventListener('click', (e) => {
-                if (!e.target.closest('.delete-chat')) {
+                if (!e.target.closest('.delete-chat') && !e.target.closest('.edit-chat')) {
                     switchToChat(chatId);
                 }
             });
-            
+
             chatItem.querySelector('.delete-chat').addEventListener('click', (e) => {
                 e.stopPropagation();
                 deleteChat(chatId);
             });
 
-            chatItem.addEventListener('click', (e) => {
-                if (!e.target.closest('.edit-chat')) {
-                    switchToChat(chatId);
-                }
-            });
-
             chatItem.querySelector('.edit-chat').addEventListener('click', (e) => {
                 e.stopPropagation();
-                const newTitle = prompt('Modifier le titre de la conversation:', title);
-                if (newTitle && newTitle.trim() !== '') {
-                    chats[chatId].title = newTitle.trim();
-                    chatItem.querySelector('p').textContent = newTitle;
-                    // Mettre à jour le titre dans la base de données
-                    fetch(`/update_conversation/${chats[chatId].dbId}`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ title: newTitle.trim() })
-                    }).catch(error => {
-                        console.error('Erreur lors de la mise à jour du titre:', error);
-                        alert('Erreur lors de la mise à jour du titre de la conversation.');
-                    });
-                }
+
+                // Popup personnalisée pour édition du titre
+                const overlay = document.createElement('div');
+                overlay.style.position = 'fixed';
+                overlay.style.top = 0;
+                overlay.style.left = 0;
+                overlay.style.width = '100vw';
+                overlay.style.height = '100vh';
+                overlay.style.background = 'rgba(30, 41, 59, 0.6)';
+                overlay.style.zIndex = 10000;
+                overlay.style.display = 'flex';
+                overlay.style.alignItems = 'center';
+                overlay.style.justifyContent = 'center';
+
+                const popup = document.createElement('div');
+                popup.className = 'rounded-xl bg-slate-800 text-white p-6 shadow-xl max-w-xs w-full';
+                popup.innerHTML = `
+                    <div class="flex items-center mb-4">
+                        <svg class="w-6 h-6 text-blue-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right: 30px;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.862 3.487a2.25 2.25 0 113.182 3.182l-10.61 10.61a2 2 0 01-.708.444l-3.11 1.11a.5.5 0 01-.64-.64l1.11-3.11a2 2 0 01.444-.708l10.61-10.61z"></path>
+                        </svg>
+                        <span class="font-semibold text-lg">Renommer la conversation</span>
+                    </div>
+                    <p class="mb-4 text-slate-300">Entrez le nouveau titre de la conversation :</p>
+                    <input id="editTitleInput" class="w-full p-2 rounded bg-slate-700 text-white mb-4" type="text" value="${title}" maxlength="100" autofocus />
+                    <div class="flex justify-end space-x-2">
+                        <button id="cancelEdit" class="px-4 py-2 rounded bg-slate-600 hover:bg-slate-700 text-white">Annuler</button>
+                        <button id="confirmEdit" class="px-4 py-2 rounded bg-blue-500 hover:bg-blue-600 text-white">Renommer</button>
+                    </div>
+                `;
+
+                overlay.appendChild(popup);
+                document.body.appendChild(overlay);
+
+                const input = popup.querySelector('#editTitleInput');
+                input.focus();
+                input.select();
+
+                popup.querySelector('#cancelEdit').onclick = () => {
+                    document.body.removeChild(overlay);
+                };
+
+                popup.querySelector('#confirmEdit').onclick = () => {
+                    const newTitle = input.value.trim();
+                    if (newTitle && newTitle !== title) {
+                        chats[chatId].title = newTitle;
+                        chatItem.querySelector('p').textContent = newTitle;
+                        // Mettre à jour le titre dans la base de données
+                        fetch(`/update_conversation/${chats[chatId].dbId}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ title: newTitle })
+                        }).catch(error => {
+                            console.error('Erreur lors de la mise à jour du titre:', error);
+                            alert('Erreur lors de la mise à jour du titre de la conversation.');
+                        });
+                    }
+                    document.body.removeChild(overlay);
+                };
+
+                input.addEventListener('keydown', (ev) => {
+                    if (ev.key === 'Enter') {
+                        popup.querySelector('#confirmEdit').click();
+                    }
+                });
             });
-            
+
             chatHistory.appendChild(chatItem);
         }
         
