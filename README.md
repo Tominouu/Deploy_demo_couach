@@ -7,7 +7,29 @@ Ce projet a pour but de **tester, comparer et intégrer différents modèles LLM
 ---
 
 ### ⚠️ SI L'IA NE RÉPOND PLUS VOICI LA DÉMARCHE À SUIVRE
-- Se connecter en **ssh** à la machine virtuelle: `ssh couachgpt@172.16.2.81` 
+
+- Se connecter en **ssh** à la machine virtuelle:
+ `ssh couachgpt@172.16.2.81` 
+- Une fois dedans, tapez la commande suivante pour vérifier que le **modèle** n'a pas été **supprimé**:
+ `ollama ls`
+- Il devrait retourner, le nom des modèles présents.
+- Si ce n'est pas le cas:
+ `ollama run <nomdumodele>`
+- Il va l'installer et ensuite le lancer automatiquement.
+- Si le modèle est bien installé, pour le redémarrer faites la même commande que celle citée ci-dessus.
+- Vous souhaitez arrêter le modèle, appuyez sur `Ctrl + D` ou tapez `/bye` dans la console.
+
+### ⚠️ SI LA PAGE WEB NE REPOND PLUS
+
+- Se connecter également en **ssh** comme il est indiqué plus haut
+- Se rendre dans le **dossier** couachgpt: 
+ `cd couachgpt`
+- Ensuite tapez:
+ `python app.py`
+- C'est censé avoir lancé le serveur, si jamais il vous dit que le port est déjà pris, alors le serveur est déjà lancé.
+- Si jamais vous êtes sur que le serveur est lancé et que la page n'est pas accessible, vérifiez les règles **NAT** du serveur, que les ports autorisés sur la **VM**:
+ `sudo ufw allow 8080`
+
 
 ## 🔬 Phase de Recherche & Benchmarks (1–4 Juillet)
 
