@@ -62,7 +62,7 @@ Ce projet a pour but de **tester, comparer et intégrer différents modèles LLM
 | `gemma3:4b`              | 3.3 Go   | 8 min 35  | ❌       | 99 %   | 52 %   |
 | `deepseek-r1:1.5b`       | 1.1 Go   | 3 min 30  | ✅       | 99 %   | 21 %   |
 | `mistral`                | 4.0 Go   | 4 min     | ✅       | 100 %  | 62 %   |
-| `deepseek-coder:6.7b`    | 3.8 Go   | 6 min 18  | 🟡 Réserve | 100 %  | 74 %   |
+| `deepseek-coder:6.7b`    | 3.8 Go   | 6 min 18  | ❌       | 100 %  | 74 %   |
 
 ---
 
