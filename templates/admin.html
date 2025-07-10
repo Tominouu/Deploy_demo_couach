@@ -23,6 +23,10 @@
                 <button class="btn-primary w-full py-2 px-4 rounded-lg text-white font-medium transition hover:bg-red-600" onclick="confirmAction('restart_flask')">Redémarrer le serveur Flask</button>
             </div>
         </div>
+        <div class="bg-slate-100 rounded-xl p-6 flex flex-col items-center shadow mt-8">
+            <h2 class="text-xl font-semibold mb-4 text-slate-700">Gestion des droits admin</h2>
+            <div id="admin-users-list" class="w-full flex flex-col gap-2"></div>
+        </div>
         <div id="result" class="mt-8 text-center text-lg font-medium"></div>
     </div>
     <script>
@@ -51,6 +55,50 @@
                 });
             }
         }
+
+        // Gestion des droits admin
+        function updateAdminRole(username, makeAdmin) {
+            fetch('/admin_action', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: makeAdmin ? 'grant_admin' : 'revoke_admin', username })
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('result').textContent = data.message || 'Action effectuée.';
+                loadAdminUsers();
+            })
+            .catch(() => {
+                document.getElementById('result').textContent = 'Erreur lors de l\'action.';
+            });
+        }
+
+        function loadAdminUsers() {
+            fetch('/admin_action', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'list_users' })
+            })
+            .then(res => res.json())
+            .then(data => {
+                const users = data.users || [];
+                const container = document.getElementById('admin-users-list');
+                container.innerHTML = '';
+                users.forEach(user => {
+                    if(user.username === 'admin') return; // Ne pas modifier le super admin
+                    const div = document.createElement('div');
+                    div.className = 'flex items-center justify-between bg-white rounded p-2 shadow';
+                    div.innerHTML = `
+                        <span class="font-medium">${user.username}</span>
+                        <button class="py-1 px-3 rounded text-white ${user.role === 'admin' ? 'bg-red-500 hover:bg-red-600' : 'bg-green-600 hover:bg-green-700'}" onclick="updateAdminRole('${user.username}', ${user.role !== 'admin'})">
+                            ${user.role === 'admin' ? 'Retirer admin' : 'Donner admin'}
+                        </button>
+                    `;
+                    container.appendChild(div);
+                });
+            });
+        }
+        document.addEventListener('DOMContentLoaded', loadAdminUsers);
     </script>
     <style>
         .btn-primary {

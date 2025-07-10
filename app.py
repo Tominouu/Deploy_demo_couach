@@ -25,7 +25,8 @@ def init_db():
     c.execute('''CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY, 
         username TEXT UNIQUE, 
-        password TEXT
+        password TEXT,
+        role TEXT DEFAULT 'user'
     )''')
     
     # Table conversations
@@ -313,11 +314,17 @@ def logout():
 def admin():
     if 'user' not in session:
         return redirect('/login')
-    if session['user'] != 'admin':
-        return "Accès interdit", 403
     
+    username = session['user']
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
+    c.execute("SELECT role FROM users WHERE username = ?", (username,))
+    user_role = c.fetchone()
+    
+    if not user_role or user_role[0] != 'admin':
+        conn.close()
+        return render_template('403.html'), 403  # Accès interdit
+
     c.execute("SELECT username FROM users")
     users = c.fetchall()
     conn.close()
@@ -327,7 +334,7 @@ def admin():
 @app.route('/admin_action', methods=['POST'])
 def admin_action():
     if 'user' not in session or session['user'] != 'admin':
-        return jsonify({'message': "Accès interdit"}), 403
+        return jsonify({'message': "Accès interdit"}), 404
     data = request.get_json()
     action = data.get('action')
     try:
@@ -367,6 +374,33 @@ def admin_action():
         elif action == 'restart_flask':
             # os.system('systemctl restart ton_flask.service')
             return jsonify({'message': "Redémarrage du serveur Flask demandé (à implémenter)."})
+        elif action == 'grant_admin':
+            username = data.get('username')
+            if not username or username == 'admin':
+                return jsonify({'message': "Action interdite."}), 400
+            conn = sqlite3.connect('users.db')
+            c = conn.cursor()
+            c.execute("UPDATE users SET role = 'admin' WHERE username = ?", (username,))
+            conn.commit()
+            conn.close()
+            return jsonify({'message': f"{username} est maintenant admin."})
+        elif action == 'revoke_admin':
+            username = data.get('username')
+            if not username or username == 'admin':
+                return jsonify({'message': "Action interdite."}), 400
+            conn = sqlite3.connect('users.db')
+            c = conn.cursor()
+            c.execute("UPDATE users SET role = '' WHERE username = ?", (username,))
+            conn.commit()
+            conn.close()
+            return jsonify({'message': f"{username} n'est plus admin."})
+        elif action == 'list_users':
+            conn = sqlite3.connect('users.db')
+            c = conn.cursor()
+            c.execute("SELECT username, COALESCE(role, '') FROM users")
+            users = [{'username': row[0], 'role': row[1]} for row in c.fetchall()]
+            conn.close()
+            return jsonify({'users': users})
         else:
             return jsonify({'message': "Action inconnue."}), 400
     except Exception as e:
