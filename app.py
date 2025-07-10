@@ -63,14 +63,44 @@ def save_history(conversation_id, prompt, response):
     conn.commit()
     conn.close()
 
+def build_prompt_with_context(conversation_id, user_message, max_history=5):
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+
+    c.execute('''
+        SELECT prompt, response FROM history
+        WHERE conversation_id = ?
+        ORDER BY timestamp DESC
+        LIMIT ?
+    ''', (conversation_id, max_history))
+
+    rows = c.fetchall()
+    conn.close()
+
+    # On inverse pour avoir l'ordre chronologique
+    rows.reverse()
+
+    # Construit le contexte texte
+    context = ""
+    for prompt, response in rows:
+        context += f"Utilisateur : {prompt}\nAssistant : {response}\n"
+    
+    # Ajoute le nouveau message utilisateur
+    context += f"Utilisateur : {user_message}\nAssistant :"
+    return context
+
+
+
 
 @app.route('/ask', methods=['POST'])
 def ask():
     data = request.get_json()
-    prompt = data.get('prompt')
+    message = data.get('userMessage', '')
+    #prompt = data.get('prompt')
+    conversation_id = data.get('conversation_id')
+    prompt = build_prompt_with_context(conversation_id, message)
     model = data.get('model', 'phi3:mini')
     message = data.get('userMessage', '')
-    conversation_id = data.get('conversation_id')
     user = session.get('user', 'anonyme')
 
     def generate():
@@ -277,6 +307,21 @@ def update_conversation(conversation_id):
 def logout():
     session.pop('user', None)
     return redirect('/login')
+
+@app.route('/admin')
+def admin():
+    if 'user' not in session:
+        return redirect('/login')
+    if session['user'] != 'admin':
+        return "Accès interdit", 403
+    
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    c.execute("SELECT username FROM users")
+    users = c.fetchall()
+    conn.close()
+    
+    return render_template('admin.html', users=[user[0] for user in users])
 
 @app.route('/')
 def chat():

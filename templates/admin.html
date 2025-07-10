@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - CouachGPT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-slate-800 to-slate-900 min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-2xl bg-white/90 rounded-2xl shadow-2xl p-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Panel d'administration</h1>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-slate-100 rounded-xl p-6 flex flex-col items-center shadow">
+                <h2 class="text-xl font-semibold mb-4 text-slate-700">Base de données</h2>
+                <button class="btn-primary w-full py-2 px-4 rounded-lg text-white font-medium mb-2 transition hover:bg-slate-700" onclick="confirmAction('clean_users')">Nettoyer la table utilisateurs</button>
+                <button class="btn-primary w-full py-2 px-4 rounded-lg text-white font-medium mb-2 transition hover:bg-slate-700" onclick="confirmAction('clean_conversations')">Nettoyer la table conversations</button>
+                <button class="btn-primary w-full py-2 px-4 rounded-lg text-white font-medium transition hover:bg-slate-700" onclick="confirmAction('clean_history')">Nettoyer la table historique</button>
+            </div>
+            <div class="bg-slate-100 rounded-xl p-6 flex flex-col items-center shadow">
+                <h2 class="text-xl font-semibold mb-4 text-slate-700">Serveur & IA</h2>
+                <button class="btn-primary w-full py-2 px-4 rounded-lg text-white font-medium mb-2 transition hover:bg-slate-700" onclick="confirmAction('restart_model')">Redémarrer le modèle IA</button>
+                <button class="btn-primary w-full py-2 px-4 rounded-lg text-white font-medium transition hover:bg-red-600" onclick="confirmAction('restart_flask')">Redémarrer le serveur Flask</button>
+            </div>
+        </div>
+        <div id="result" class="mt-8 text-center text-lg font-medium"></div>
+    </div>
+    <script>
+        function confirmAction(action) {
+            let msg = '';
+            switch(action) {
+                case 'clean_users': msg = "Voulez-vous vraiment nettoyer la table utilisateurs ?"; break;
+                case 'clean_conversations': msg = "Voulez-vous vraiment nettoyer la table conversations ?"; break;
+                case 'clean_history': msg = "Voulez-vous vraiment nettoyer la table historique ?"; break;
+                case 'restart_model': msg = "Redémarrer le modèle IA ?"; break;
+                case 'restart_flask': msg = "Redémarrer le serveur Flask ?"; break;
+            }
+            if(confirm(msg)) {
+                fetch('/admin_action', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('result').textContent = data.message || 'Action effectuée.';
+                })
+                .catch(() => {
+                    document.getElementById('result').textContent = 'Erreur lors de l\'action.';
+                });
+            }
+        }
+    </script>
+    <style>
+        .btn-primary {
+            background: linear-gradient(135deg, #334155 0%, #475569 100%);
+        }
+    </style>
+</body>
+</html>
