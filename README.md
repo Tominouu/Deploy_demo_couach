@@ -168,9 +168,10 @@ Après tests :
 ## 🧪 Update 10 Juillet – Confort expérience utilisateur
 
 - Ajout d'une popup personnalisée pour le **Delete** et le **Edit**.
-- Clé **ssh** active pour **commit & push**, gain de temps considérable
-- Début du **responsive** pour mobile
-- **Correction** du bug de la **Sidebar** qui n'était plus active, mode **plein écran** disponible
+- Clé **ssh** active pour **commit & push**, gain de temps considérable.
+- Début du **responsive** pour mobile.
+- **Correction** du bug de la **Sidebar** qui n'était plus active, mode **plein écran** disponible.
+- Ajout d'un **bouton** pour stopper la **génération**. 
 
 
 
