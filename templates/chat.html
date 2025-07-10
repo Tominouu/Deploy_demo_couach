@@ -12,18 +12,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
 </head>
 <body class="yacht-hero h-screen flex overflow-hidden">
-    <!-- Bouton hamburger mobile -->
-    <button id="mobileSidebarBtn" class="fixed top-4 left-4 z-50 bg-white/80 rounded-full p-2 shadow-lg md:hidden" style="display: block;">
-        <svg class="w-7 h-7 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-        </svg>
-    </button>
     <!-- sidebar historique des chats -->
     <div id="sidebar" class="sidebar glass-dark flex flex-col">
         <!-- sidebar en haut -->
         <div class="p-4 border-b border-white/20">
             <div class="flex items-center justify-between">
-                <div id="sidebarContent">
+                <div id="sidebarContent" class="sidebar-hide-when-collapsed">
                     <div class="text-center mb-8 floating-animation">
                         <img src="https://couach.com/wp-content/uploads/2019/04/Couach-Logo-blanc-WEB-768x170.png" alt="Logo Couach">
                     </div>
@@ -37,7 +31,7 @@
         </div>
         
         <!-- nouveau chat-->
-        <div class="p-4 border-b border-white/20">
+        <div class="p-4 border-b border-white/20 sidebar-hide-when-collapsed">
             <button id="newChatBtn" class="w-full bg-white/20 hover:bg-white/30 text-white rounded-lg py-2 px-3 text-sm font-medium transition-colors">
                 <span id="newChatText">+ Nouvelle conversation</span>
                 <span id="newChatIcon" class="hidden">+</span>
@@ -45,14 +39,14 @@
         </div>
         
         <!-- liste des chats-->
-        <div class="flex-1 overflow-y-auto p-2">
+        <div class="flex-1 overflow-y-auto p-2 sidebar-hide-when-collapsed">
             <div id="chatHistory" class="space-y-2">
                 <!-- Les chats seront ajoutés dynamiquement ici -->
             </div>
         </div>
         
         <!-- footer sidebar -->
-        <div class="p-4 border-t border-white/20">
+        <div class="p-4 border-t border-white/20 sidebar-hide-when-collapsed">
             <div id="userInfo" class="flex items-center space-x-3">
                 <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
                     <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -62,7 +56,6 @@
                 <div id="userDetails">
                     <p class="text-white text-sm font-medium">{{user}}</p>
                     <p class="text-white/60 text-xs">En ligne</p>
-                    
                 </div>
                 <button title="Déconnexion" onclick="location.href='{{ url_for('logout') }}'" class="ml-2 p-1 rounded text-white/60 hover:text-red-400 p-1" style="margin-left: 160px; margin-top: 5px;">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="white" stroke-width="2" 
@@ -153,33 +146,20 @@
     });
     </script>
     <script>
-    // Responsive sidebar mobile
-    const sidebar = document.getElementById('sidebar');
-    const mobileSidebarBtn = document.getElementById('mobileSidebarBtn');
-    const closeSidebarBtn = document.getElementById('closeSidebarBtn');
-    
-    function openSidebar() {
-        sidebar.classList.add('active');
-        sidebar.style.transform = 'translateX(0)';
-        closeSidebarBtn.style.display = 'block';
+    // Toggle sidebar desktop (repli/étend) avec le bouton dans la sidebar
+    const toggleSidebarBtn = document.getElementById('toggleSidebar');
+    function toggleSidebarDesktop() {
+        if (window.innerWidth >= 1024) {
+            sidebar.classList.toggle('collapsed');
+        }
     }
-    function closeSidebar() {
-        sidebar.classList.remove('active');
-        sidebar.style.transform = '';
-        closeSidebarBtn.style.display = 'none';
+    if (toggleSidebarBtn) {
+        toggleSidebarBtn.addEventListener('click', toggleSidebarDesktop);
     }
-    if (mobileSidebarBtn) {
-        mobileSidebarBtn.addEventListener('click', openSidebar);
-    }
-    if (closeSidebarBtn) {
-        closeSidebarBtn.addEventListener('click', closeSidebar);
-    }
-    // Fermer la sidebar si on clique en dehors sur mobile
+    // Optionnel : retirer la classe collapsed si on repasse en mobile
     window.addEventListener('resize', () => {
-        if (window.innerWidth > 768) {
-            sidebar.classList.remove('active');
-            sidebar.style.transform = '';
-            closeSidebarBtn.style.display = 'none';
+        if (window.innerWidth < 1024) {
+            sidebar.classList.remove('collapsed');
         }
     });
     </script>
