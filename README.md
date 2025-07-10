@@ -2,11 +2,17 @@
 
 ## 📅 Contexte & Objectifs
 
-Ce projet a pour but de **tester, comparer et intégrer différents modèles LLM** (Large Language Models) exécutés **en local** sur serveur sans GPU. Le tout sera lié sur une interface web style "ChatGPT", accessible par tous les utilisateurs connectés sur le réseau via cet **IP:** http://172.16.2.81:8294/. L'objectif est de trouver un compromis optimal entre **performances**, **consommation**, et **réactivité**.
+Ce projet a pour but de **tester, comparer et intégrer différents modèles LLM** (Large Language Models) exécutés **en local** sur serveur sans GPU. Le tout sera lié sur une **interface web** style "ChatGPT", accessible par tous les utilisateurs connectés sur le réseau via cet **IP:** http://172.16.2.81:8294/. L'objectif est de trouver un compromis optimal entre **performances**, **consommation**, et **réactivité**.
 
 ---
 
 ### ⚠️ SI L'IA NE RÉPOND PLUS VOICI LA DÉMARCHE À SUIVRE
+
+## Méthode Simple:
+
+- Connectez vous sur cette page, http://172.16.2.81:8294/admin, si vous avez un accès refusé changez de **compte** (passez sur le **admin**), depuis le **panel** vous pourrez **redémarrer** les différents **services**.
+
+## Méthode Manuelle:
 
 - Se connecter en **ssh** à la machine virtuelle:
  `ssh couachgpt@172.16.2.81` 
@@ -35,9 +41,9 @@ Ce projet a pour but de **tester, comparer et intégrer différents modèles LLM
 
 ### 🖥️ Configuration Matérielle Testée
 
-- **RAM** : 16 à 24 Go  
-- **CPU** : 2 sockets, 5–20 cores  
-- **Pas de GPU**
+- **RAM** : 16 à 24 Go.
+- **CPU** : 2 sockets, 5–20 cores.  
+- **Pas de GPU**.
 
 ---
 
@@ -171,7 +177,12 @@ Après tests :
 - Clé **ssh** active pour **commit & push**, gain de temps considérable.
 - Début du **responsive** pour mobile.
 - **Correction** du bug de la **Sidebar** qui n'était plus active, mode **plein écran** disponible.
-- Ajout d'un **bouton** pour stopper la **génération**. 
+- Ajout d'un **bouton** pour stopper la **génération**.
+- La **feature** de remise en **contexte** est maintenant disponible, l'IA prend au maximum les 5 derniers échanges (variable modifiable), je l'ai mis à 5 car il fallait avoir un **bon équilibre performance / qualité**, si le serveur devient plus puissant on pourra augmenter la **variable de contexte**.
+- J'ai repéré un soucis par rapport à la recontextualisation, l'IA a des **limites** en terme de **confidentialité**, je m'explique: Imaginons je lui au début de la conversation **"salut je m'appelle Tom" OU "salut j'ai 2 chats"**, dans ces deux cas j'ai fais le test de recharger la page pour vider le cache de l'IA et dans 80% des cas quand je lui demande **"comment je m'appelle" OU "combien j'ai de chats"**, l'IA va dire qu'il est impossible de répondre à cette question pour des raisons de confidentialité. Alors que la mémoire a bien été activée, les données ont été enregistrées sur la base de données et sont redonnées à l'IA à chaque interaction.
+
+---
+
 
 
 
