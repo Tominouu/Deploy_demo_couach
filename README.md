@@ -41,9 +41,9 @@ Ce projet a pour but de **tester, comparer et intégrer différents modèles LLM
 
 ### 🖥️ Configuration Matérielle Testée
 
-- **RAM** : 16 à 24 Go  
-- **CPU** : 2 sockets, 5–20 cores  
-- **Pas de GPU**
+- **RAM** : 16 à 24 Go.
+- **CPU** : 2 sockets, 5–20 cores.  
+- **Pas de GPU**.
 
 ---
 
