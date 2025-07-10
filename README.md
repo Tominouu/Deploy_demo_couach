@@ -123,6 +123,12 @@ Après tests :
 
 ---
 
+## 🧪 Update 5-6 Juillet – Tests des Modèles
+
+- Tests des différents **modèles** retenus directement sur l'interface web **minimale**.
+
+---
+
 ## 🧪 Update 7 Juillet – Serveur & Interface Web
 
 - Intégration d’un **serveur local avec Flask (Python)** pour combiner front et IA.
@@ -134,6 +140,7 @@ Après tests :
 - Début de l'interface racine (/) (Interface de test sans style)
 
 ---
+
 
 ## 🧪 Update 8 Juillet – Serveur & Interface Web Améliorations
 
@@ -164,6 +171,8 @@ Après tests :
 - Clé **ssh** active pour **commit & push**, gain de temps considérable
 - Début du **responsive** pour mobile
 - **Correction** du bug de la **Sidebar** qui n'était plus active, mode **plein écran** disponible
+
+
 
 
 ## 📚 Auteur
