@@ -321,40 +321,69 @@
         }
         
         async function deleteChat(chatId) {
-            if (confirm('Êtes-vous sûr de vouloir supprimer cette conversation ?')) {
-                const chat = chats[chatId];
+            // Créer une popup personnalisée
+            const overlay = document.createElement('div');
+            overlay.style.position = 'fixed';
+            overlay.style.top = 0;
+            overlay.style.left = 0;
+            overlay.style.width = '100vw';
+            overlay.style.height = '100vh';
+            overlay.style.background = 'rgba(30, 41, 59, 0.6)';
+            overlay.style.zIndex = 10000;
+            overlay.style.display = 'flex';
+            overlay.style.alignItems = 'center';
+            overlay.style.justifyContent = 'center';
 
-                // Appeler le bon endpoint Flask
+            const popup = document.createElement('div');
+            popup.className = 'rounded-xl bg-slate-800 text-white p-6 shadow-xl max-w-xs w-full ';
+            popup.innerHTML = `
+                <div class="flex items-center mb-4">
+                    <svg class="w-6 h-6 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right: 30px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                    <span class="font-semibold text-lg">Supprimer la conversation ?</span>
+                </div>
+                <p class="mb-6 text-slate-300">Êtes-vous sûr de vouloir supprimer cette conversation ? Cette action est irréversible.</p>
+                <div class="flex justify-end space-x-2">
+                    <button id="cancelDelete" class="px-4 py-2 rounded bg-slate-600 hover:bg-slate-700 text-white">Annuler</button>
+                    <button id="confirmDelete" class="px-4 py-2 rounded bg-red-500 hover:bg-red-600 text-white">Supprimer</button>
+                </div>
+            `;
+
+            overlay.appendChild(popup);
+            document.body.appendChild(overlay);
+
+            // Gestion des boutons
+            popup.querySelector('#cancelDelete').onclick = () => {
+                document.body.removeChild(overlay);
+            };
+
+            popup.querySelector('#confirmDelete').onclick = async () => {
+                const chat = chats[chatId];
                 try {
                     const response = await fetch(`/delete_conversation/${chat.dbId}`, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
+                        headers: { 'Content-Type': 'application/json' }
                     });
-
                     const result = await response.json();
-
                     if (result.success) {
-                        // Supprimer localement
                         delete chats[chatId];
                         document.querySelector(`[data-chat-id="${chatId}"]`).remove();
-
                         if (currentChatId === chatId) {
                             currentChatId = null;
                             clearMessages();
                             addWelcomeMessage();
                         }
+                        document.body.removeChild(overlay);
                     } else {
-                        console.error('Erreur serveur:', result.error || 'Suppression impossible');
                         alert('Une erreur est survenue lors de la suppression.');
+                        document.body.removeChild(overlay);
                     }
-
                 } catch (error) {
-                    console.error('Erreur réseau lors de la suppression:', error);
                     alert('Erreur réseau : impossible de supprimer la conversation.');
+                    document.body.removeChild(overlay);
                 }
-            }
+            };
         }
 
 
