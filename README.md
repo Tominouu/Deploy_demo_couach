@@ -8,6 +8,12 @@ Ce projet a pour but de **tester, comparer et intégrer différents modèles LLM
 
 ### ⚠️ SI L'IA NE RÉPOND PLUS VOICI LA DÉMARCHE À SUIVRE
 
+## Méthode Simple:
+
+- Connectez vous sur cette page, http://172.16.2.81:8294/admin, si vous avez un accès refusé changez de **compte** (passez sur le **admin**), depuis le **panel** vous pourrez **redémarrer** les différents **services**.
+
+## Méthode Manuelle:
+
 - Se connecter en **ssh** à la machine virtuelle:
  `ssh couachgpt@172.16.2.81` 
 - Une fois dedans, tapez la commande suivante pour vérifier que le **modèle** n'a pas été **supprimé**:
@@ -20,6 +26,12 @@ Ce projet a pour but de **tester, comparer et intégrer différents modèles LLM
 - Vous souhaitez arrêter le modèle, appuyez sur `Ctrl + D` ou tapez `/bye` dans la console.
 
 ### ⚠️ SI LA PAGE WEB NE REPOND PLUS
+
+## Méthode Simple:
+
+- Connectez vous sur cette page, http://172.16.2.81:8294/admin, si vous avez un accès refusé changez de **compte** (passez sur le **admin**), depuis le **panel** vous pourrez **redémarrer** les différents **services**.
+
+## Méthode Manuelle:
 
 - Se connecter également en **ssh** comme il est indiqué plus haut
 - Se rendre dans le **dossier** couachgpt: 
