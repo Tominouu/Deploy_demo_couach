@@ -18,7 +18,8 @@
             </div>
             <div class="bg-slate-100 rounded-xl p-6 flex flex-col items-center shadow">
                 <h2 class="text-xl font-semibold mb-4 text-slate-700">Serveur & IA</h2>
-                <button class="btn-primary w-full py-2 px-4 rounded-lg text-white font-medium mb-2 transition hover:bg-slate-700" onclick="confirmAction('restart_model')">Redémarrer le modèle IA</button>
+                <button class="btn-primary w-full py-2 px-4 rounded-lg text-white font-medium mb-2 transition hover:bg-slate-700" onclick="confirmAction('restart_model')">Redémarrer le service Ollama</button>
+                <button class="btn-primary w-full py-2 px-4 rounded-lg text-white font-medium mb-2 transition hover:bg-slate-700" onclick="confirmAction('run_model')">Lancer le modèle phi3</button>
                 <button class="btn-primary w-full py-2 px-4 rounded-lg text-white font-medium transition hover:bg-red-600" onclick="confirmAction('restart_flask')">Redémarrer le serveur Flask</button>
             </div>
         </div>
@@ -33,6 +34,7 @@
                 case 'clean_history': msg = "Voulez-vous vraiment nettoyer la table historique ?"; break;
                 case 'restart_model': msg = "Redémarrer le modèle IA ?"; break;
                 case 'restart_flask': msg = "Redémarrer le serveur Flask ?"; break;
+                case 'run_model': msg = "Lancer le modèle phi3 ?"; break;
             }
             if(confirm(msg)) {
                 fetch('/admin_action', {

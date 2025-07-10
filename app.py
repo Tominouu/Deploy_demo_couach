@@ -6,6 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import timedelta
 from zoneinfo import ZoneInfo
 import datetime
+import os
 import random
 
 
@@ -323,6 +324,54 @@ def admin():
     
     return render_template('admin.html', users=[user[0] for user in users])
 
+@app.route('/admin_action', methods=['POST'])
+def admin_action():
+    if 'user' not in session or session['user'] != 'admin':
+        return jsonify({'message': "Accès interdit"}), 403
+    data = request.get_json()
+    action = data.get('action')
+    try:
+        if action == 'clean_users':
+            conn = sqlite3.connect('users.db')
+            c = conn.cursor()
+            c.execute("DELETE FROM users WHERE username != 'admin'")
+            conn.commit()
+            conn.close()
+            return jsonify({'message': "Table utilisateurs nettoyée (admin conservé)."})
+        elif action == 'clean_conversations':
+            conn = sqlite3.connect('users.db')
+            c = conn.cursor()
+            c.execute('DELETE FROM conversations')
+            conn.commit()
+            conn.close()
+            return jsonify({'message': "Table conversations nettoyée."})
+        elif action == 'clean_history':
+            conn = sqlite3.connect('users.db')
+            c = conn.cursor()
+            c.execute('DELETE FROM history')
+            conn.commit()
+            conn.close()
+            return jsonify({'message': "Table historique nettoyée."})
+        elif action == 'restart_model':
+            # Redémarre le service Ollama
+            os.system('sudo systemctl restart ollama')
+            return jsonify({'message': "Service Ollama redémarré. Les modèles seront rechargés à la prochaine requête."})
+        elif action == 'run_model':
+            # Exemple : lance un modèle spécifique (ici phi3) via ollama
+            # Adapte la commande selon ton besoin exact
+            result = os.system('ollama run phi3:mini')
+            if result == 0:
+                return jsonify({'message': "Modèle phi3 lancé via Ollama."})
+            else:
+                return jsonify({'message': "Erreur lors du lancement du modèle."}), 500
+        elif action == 'restart_flask':
+            # os.system('systemctl restart ton_flask.service')
+            return jsonify({'message': "Redémarrage du serveur Flask demandé (à implémenter)."})
+        else:
+            return jsonify({'message': "Action inconnue."}), 400
+    except Exception as e:
+        return jsonify({'message': f"Erreur: {e}"}), 500
+    
 @app.route('/')
 def chat():
     if 'user' not in session:
