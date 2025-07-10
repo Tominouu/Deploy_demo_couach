@@ -321,30 +321,55 @@ def admin():
     c.execute("SELECT role FROM users WHERE username = ?", (username,))
     user_role = c.fetchone()
     
-    if not user_role or user_role[0] != 'admin':
+    if not user_role or user_role[0] not in ('admin', 'root'):
         conn.close()
         return render_template('403.html'), 403  # Accès interdit
 
-    c.execute("SELECT username FROM users")
+    c.execute("SELECT username, COALESCE(role, '') FROM users")
     users = c.fetchall()
     conn.close()
     
-    return render_template('admin.html', users=[user[0] for user in users])
+    return render_template('admin.html', users=[{'username': user[0], 'role': user[1]} for user in users])
 
 @app.route('/admin_action', methods=['POST'])
 def admin_action():
-    if 'user' not in session or session['user'] != 'admin':
-        return jsonify({'message': "Accès interdit"}), 404
+    username = session['user']
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    c.execute("SELECT role FROM users WHERE username = ?", (username,))
+    user_role = c.fetchone()
+    if not user_role or user_role[0] not in ('admin', 'root'):
+        conn.close()
+        return render_template('403.html'), 403  # Accès interdit
     data = request.get_json()
     action = data.get('action')
     try:
-        if action == 'clean_users':
+        # Only root can change user roles
+        if action in ('grant_admin', 'revoke_admin'):
+            if user_role[0] != 'root':
+                return jsonify({'message': "Seul l'utilisateur root peut changer le statut des comptes."}), 403
+            target_username = data.get('username')
+            if not target_username or target_username in ('admin', 'root'):
+                return jsonify({'message': "Action interdite."}), 400
             conn = sqlite3.connect('users.db')
             c = conn.cursor()
-            c.execute("DELETE FROM users WHERE username != 'admin'")
+            if action == 'grant_admin':
+                c.execute("UPDATE users SET role = 'admin' WHERE username = ?", (target_username,))
+                conn.commit()
+                conn.close()
+                return jsonify({'message': f"{target_username} est maintenant admin."})
+            elif action == 'revoke_admin':
+                c.execute("UPDATE users SET role = '' WHERE username = ?", (target_username,))
+                conn.commit()
+                conn.close()
+                return jsonify({'message': f"{target_username} n'est plus admin."})
+        elif action == 'clean_users':
+            conn = sqlite3.connect('users.db')
+            c = conn.cursor()
+            c.execute("DELETE FROM users WHERE username NOT IN ('admin', 'root')")
             conn.commit()
             conn.close()
-            return jsonify({'message': "Table utilisateurs nettoyée (admin conservé)."})
+            return jsonify({'message': "Table utilisateurs nettoyée (admin/root conservés)."})
         elif action == 'clean_conversations':
             conn = sqlite3.connect('users.db')
             c = conn.cursor()
@@ -360,40 +385,16 @@ def admin_action():
             conn.close()
             return jsonify({'message': "Table historique nettoyée."})
         elif action == 'restart_model':
-            # Redémarre le service Ollama
             os.system('sudo systemctl restart ollama')
             return jsonify({'message': "Service Ollama redémarré. Les modèles seront rechargés à la prochaine requête."})
         elif action == 'run_model':
-            # Exemple : lance un modèle spécifique (ici phi3) via ollama
-            # Adapte la commande selon ton besoin exact
             result = os.system('ollama run phi3:mini')
             if result == 0:
                 return jsonify({'message': "Modèle phi3 lancé via Ollama."})
             else:
                 return jsonify({'message': "Erreur lors du lancement du modèle."}), 500
         elif action == 'restart_flask':
-            # os.system('systemctl restart ton_flask.service')
             return jsonify({'message': "Redémarrage du serveur Flask demandé (à implémenter)."})
-        elif action == 'grant_admin':
-            username = data.get('username')
-            if not username or username == 'admin':
-                return jsonify({'message': "Action interdite."}), 400
-            conn = sqlite3.connect('users.db')
-            c = conn.cursor()
-            c.execute("UPDATE users SET role = 'admin' WHERE username = ?", (username,))
-            conn.commit()
-            conn.close()
-            return jsonify({'message': f"{username} est maintenant admin."})
-        elif action == 'revoke_admin':
-            username = data.get('username')
-            if not username or username == 'admin':
-                return jsonify({'message': "Action interdite."}), 400
-            conn = sqlite3.connect('users.db')
-            c = conn.cursor()
-            c.execute("UPDATE users SET role = '' WHERE username = ?", (username,))
-            conn.commit()
-            conn.close()
-            return jsonify({'message': f"{username} n'est plus admin."})
         elif action == 'list_users':
             conn = sqlite3.connect('users.db')
             c = conn.cursor()
