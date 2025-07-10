@@ -6,6 +6,9 @@ Ce projet a pour but de **tester, comparer et intégrer différents modèles LLM
 
 ---
 
+### ⚠️ SI L'IA NE RÉPOND PLUS VOICI LA DÉMARCHE À SUIVRE
+- Se connecter en **ssh** à la machine virtuelle: `ssh couachgpt@172.16.2.81` 
+
 ## 🔬 Phase de Recherche & Benchmarks (1–4 Juillet)
 
 ### 🖥️ Configuration Matérielle Testée
