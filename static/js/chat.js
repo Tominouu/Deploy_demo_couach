@@ -649,6 +649,7 @@
             
             // Formatter le texte avec markdown
             aiMessageElement.innerHTML = formatMarkdown(text);
+            addCopyButtonsToCodeBlocks();
             scrollToBottom();
         }
         
@@ -820,3 +821,51 @@
             messageInput.style.height = 'auto';
             messageInput.style.height = Math.min(messageInput.scrollHeight, 128) + 'px';
         }
+
+        // Ajout d'un bouton de copie sur chaque bloc de code généré
+function addCopyButtonsToCodeBlocks() {
+    document.querySelectorAll('.message-ai pre code').forEach((block) => {
+        // Éviter de dupliquer le bouton
+        if (block.parentNode.querySelector('.copy-btn')) return;
+        const btn = document.createElement('button');
+        btn.className = 'copy-btn absolute top-2 right-2 bg-slate-700 text-white text-xs px-2 py-1 rounded hover:bg-blue-500 transition z-10';
+        btn.textContent = 'Copier';
+        btn.title = 'Copier le code';
+        btn.onclick = (e) => {
+            e.stopPropagation();
+            const code = block.innerText;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(code).then(() => {
+                    btn.textContent = 'Copié !';
+                    setTimeout(() => btn.textContent = 'Copier', 1200);
+                }).catch(() => {
+                    fallbackCopyTextToClipboard(code, btn);
+                });
+            } else {
+                fallbackCopyTextToClipboard(code, btn);
+            }
+        };
+        block.parentNode.style.position = 'relative';
+        block.parentNode.appendChild(btn);
+    });
+}
+
+// Fallback pour vieux navigateurs ou contextes non sécurisés
+function fallbackCopyTextToClipboard(text, btn) {
+    try {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'absolute';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        btn.textContent = 'Copié !';
+        setTimeout(() => btn.textContent = 'Copier', 1200);
+    } catch (err) {
+        btn.textContent = 'Erreur';
+        setTimeout(() => btn.textContent = 'Copier', 1200);
+    }
+}
