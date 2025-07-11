@@ -38,6 +38,19 @@
             </button>
         </div>
         
+        <!-- Champ de recherche de chats -->
+        <div class="p-4 border-b border-white/20 sidebar-hide-when-collapsed">
+            <div class="relative">
+                <input id="searchChatInput" type="text" placeholder="Rechercher une conversation..." 
+                    class="w-full rounded-lg px-4 py-2 pl-10 text-sm bg-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-blue-400 shadow transition border border-transparent hover:bg-white/30"
+                    style="box-shadow: 0 2px 8px 0 rgba(30,41,59,0.08);" />
+                <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/70 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+            </div>
+        </div>
+        
         <!-- liste des chats-->
         <div class="flex-1 overflow-y-auto p-2 sidebar-hide-when-collapsed">
             <div id="chatHistory" class="space-y-2">
@@ -75,7 +88,7 @@
         <div class="glass-effect p-4 border-b border-gray-200 flex items-center justify-between">
             <div>
                 <h1 class="text-xl font-semibold text-gray-800">Assistant IA</h1>
-                <p class="text-sm text-gray-600">Chantier Naval de Couach</p>
+                <p class="text-sm text-gray-600">Chantier Naval Couach</p>
             </div>
             <a href="{{ url_for('admin') }}" title="Admin" class="ml-auto mr-4 bg-white/80 hover:bg-white text-gray-800 rounded-full p-2 shadow-lg transition-colors flex items-center justify-center">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">

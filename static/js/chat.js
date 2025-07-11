@@ -78,6 +78,18 @@
             window.addEventListener('resize', () => {
                 scrollToBottom();
             });
+
+            // Filtrage des chats par recherche
+            const searchInput = document.getElementById('searchChatInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    const search = this.value.toLowerCase();
+                    document.querySelectorAll('.chat-item').forEach(item => {
+                        const title = item.querySelector('.font-medium')?.textContent?.toLowerCase() || '';
+                        item.style.display = title.includes(search) ? '' : 'none';
+                    });
+                });
+            }
         }
 
         // Attendre que le DOM soit complètement chargé
