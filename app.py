@@ -102,6 +102,11 @@ def ask():
     conversation_id = data.get('conversation_id')
     prompt = build_prompt_with_context(conversation_id, message)
     model = data.get('model', 'phi3:mini')
+    # Précharger le modèle si besoin (lance ollama run en tâche de fond, ne bloque pas la requête)
+    try:
+        os.system(f"ollama run {model} --help > /dev/null 2>&1 &")
+    except Exception as e:
+        print(f"Erreur lors du préchargement du modèle {model}: {e}")
     message = data.get('userMessage', '')
     user = session.get('user', 'anonyme')
 

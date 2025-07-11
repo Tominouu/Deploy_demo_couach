@@ -690,7 +690,7 @@
             // Envoi réel à l'API backend
             const payload = {
                 prompt: message,
-                model: 'phi3:mini',
+                model: document.getElementById('modelSelect').value,
                 userMessage: message,
                 conversation_id: currentChat.dbId
             };
@@ -808,4 +808,3 @@
             messageInput.style.height = 'auto';
             messageInput.style.height = Math.min(messageInput.scrollHeight, 128) + 'px';
         }
-        

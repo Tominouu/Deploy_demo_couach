@@ -120,6 +120,14 @@
         <div class="glass-effect border-t border-gray-200 p-4">
             <div class="max-w-4xl mx-auto">
                 <div class="flex items-end space-x-4">
+                    <div>
+                        <label for="modelSelect" class="block text-xs text-gray-500 mb-1">Modèle IA</label>
+                        <select id="modelSelect" class="rounded-lg border border-slate-300 px-2 py-2 focus:outline-none focus:ring-2 focus:ring-slate-400 bg-white text-gray-800 text-sm font-medium">
+                            <option value="phi3:mini">phi3:mini</option>
+                            <option value="deepseek-r1:1.5b">deepseek-r1:1.5b</option>
+                            <option value="mistral:7b">mistral:7b</option>
+                        </select>
+                    </div>
                     <div class="flex-1">
                         <textarea 
                             id="messageInput"
