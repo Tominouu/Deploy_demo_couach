@@ -6,10 +6,32 @@
     
         
         .yacht-hero {
-            background: linear-gradient(rgba(99, 110, 136, 0.7), rgba(54, 67, 88, 0.8)), url(https://couach.com/wp-content/uploads/2019/05/013.300dpi4.jpg);
-            background-size: cover;
-            
-            
+            position: relative;
+            overflow: hidden;
+        }
+
+        .yacht-hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            background: url(https://couach.com/wp-content/uploads/2019/05/013.300dpi4.jpg) center/cover no-repeat;
+            transform: rotate(-1deg);
+            pointer-events: none;
+        }
+
+        .yacht-hero::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            background: linear-gradient(rgba(99, 110, 136, 0.7), rgba(54, 67, 88, 0.8));
+            pointer-events: none;
+        }
+
+        .yacht-hero > * {
+            position: relative;
+            z-index: 2;
         }
         
         .glass-effect {
