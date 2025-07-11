@@ -180,8 +180,16 @@ Après tests :
 - Ajout d'un **bouton** pour stopper la **génération**.
 - La **feature** de remise en **contexte** est maintenant disponible, l'IA prend au maximum les 5 derniers échanges (variable modifiable), je l'ai mis à 5 car il fallait avoir un **bon équilibre performance / qualité**, si le serveur devient plus puissant on pourra augmenter la **variable de contexte**.
 - J'ai repéré un soucis par rapport à la recontextualisation, l'IA a des **limites** en terme de **confidentialité**, je m'explique: Imaginons je lui au début de la conversation **"salut je m'appelle Tom" OU "salut j'ai 2 chats"**, dans ces deux cas j'ai fais le test de recharger la page pour vider le cache de l'IA et dans 80% des cas quand je lui demande **"comment je m'appelle" OU "combien j'ai de chats"**, l'IA va dire qu'il est impossible de répondre à cette question pour des raisons de confidentialité. Alors que la mémoire a bien été activée, les données ont été enregistrées sur la base de données et sont redonnées à l'IA à chaque interaction.
+- Ajout d'un **panel** admin, afin de gérer plus facilement les **debugs (redémarage sevreur, ia, nettoyage db)**, également gestion des **utilisateurs** pour les **droits admin**, permettant d'accéder à ce panel.
 
 ---
+
+## 🧪 Update 11 Juillet – Changement modèle directement depuis le web
+
+- Ajout de la possibilité de changer de modèle pour générer les réponses directement depuis l'interface web (en cours)
+
+---
+
 
 
 
