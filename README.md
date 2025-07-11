@@ -188,6 +188,7 @@ Après tests :
 
 - Ajout de la possibilité de **changer** de **modèle** pour générer les **réponses**directement depuis l'interface web.
 - Ajout d'une **barre de recherche** pour trouver plus facilement une discussion.
+- Ajout de la **fonction** copier-coller, pour les **blocs de code**.
 
 ---
 
