@@ -105,6 +105,9 @@ def ask():
     # Précharger le modèle si besoin (lance ollama run en tâche de fond, ne bloque pas la requête)
     try:
         os.system(f"ollama run {model} --help > /dev/null 2>&1 &")
+        # Désactiver 'thinking' pour deepseek si sélectionné
+        if model == 'deepseek-r1:1.5b':
+            os.system("ollama run deepseek-r1:1.5b -- /set nothink > /dev/null 2>&1 &")
     except Exception as e:
         print(f"Erreur lors du préchargement du modèle {model}: {e}")
     message = data.get('userMessage', '')
@@ -397,7 +400,7 @@ def admin_action():
             if result == 0:
                 return jsonify({'message': "Modèle phi3 lancé via Ollama."})
             else:
-                return jsonify({'message': "Erreur lors du lancement du modèle."}), 500
+                return jsonify({'message': "Erreur lors du lancement du modèle."}, 500)
         elif action == 'restart_flask':
             return jsonify({'message': "Redémarrage du serveur Flask demandé (à implémenter)."})
         elif action == 'list_users':
