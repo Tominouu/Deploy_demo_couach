@@ -445,7 +445,7 @@ def login():
             session['user'] = username
             return redirect('/')
         else:
-            return "Échec de la connexion"
+            return render_template('login.html', error="Echec de la connexion, nom d'utilisateur ou mot de passe incorrect.")
     return render_template('login.html') #les fichiers html sont dans le dossier templates, on peut pas les mettre ailleurs.
 
 @app.route('/register', methods=['POST'])
