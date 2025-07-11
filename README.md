@@ -186,7 +186,8 @@ Après tests :
 
 ## 🧪 Update 11 Juillet – Changement modèle directement depuis le web
 
-- Ajout de la possibilité de changer de modèle pour générer les réponses directement depuis l'interface web (en cours)
+- Ajout de la possibilité de **changer** de **modèle** pour générer les **réponses**directement depuis l'interface web.
+- Ajout d'une **barre de recherche** pour trouver plus facilement une discussion.
 
 ---
 
