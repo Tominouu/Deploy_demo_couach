@@ -7,9 +7,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/chat.css') }}">
     <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/collab.js') }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+    
 </head>
 <body class="yacht-hero h-screen flex overflow-hidden">
     <!-- sidebar historique des chats -->
@@ -119,6 +121,25 @@
                 <h1 class="text-xl font-semibold text-gray-800">Assistant IA</h1>
                 <p class="text-sm text-gray-600">Chantier Naval Couach</p>
             </div>
+                        <!-- Barre de recherche utilisateurs -->
+            <div class="flex-1 mx-6 flex items-center justify-center space-x-4">
+            <input 
+                id="userSearchInput"
+                type="text" 
+                placeholder="Rechercher un collaborateur par pseudo..."
+                class="w-full max-w-md rounded-lg px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800"
+            />
+            <button id="notificationsBtn" class="relative p-2 rounded-full bg-white/80 hover:bg-white shadow transition">
+                <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                </svg>
+                <span id="notifBadge" class="absolute top-0 right-0 block w-2 h-2 bg-red-500 rounded-full animate-pulse hidden"></span>
+            </button>
+            </div>
+            <!-- Résultats de recherche -->
+            <div id="search-results" class="absolute z-50 mt-2 bg-white border border-gray-300 rounded-lg shadow w-full max-w-md"></div>
+
+
             <a href="{{ url_for('admin') }}" title="Admin" class="ml-auto mr-4 bg-white/80 hover:bg-white text-gray-800 rounded-full p-2 shadow-lg transition-colors flex items-center justify-center">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <rect x="3" y="6" width="18" height="13" rx="2" />
@@ -208,6 +229,11 @@
             </div>
         </div>
     </div>
+    <!-- Popup Notifications -->
+    <div id="notifications-popup" class="hidden fixed top-16 right-4 w-96 max-h-[70vh] overflow-y-auto bg-white border border-gray-300 shadow-lg rounded-lg z-50">
+    <div id="notifications-list" class="p-4 space-y-2"></div>
+    </div>
+
     <script>
     const loggedInUser = {{ user|tojson }};
     document.addEventListener("DOMContentLoaded", () => {
@@ -255,6 +281,17 @@
         });
     }
     </script>
+        <!-- Popup notification -->
+    <div id="notificationPopup" class="fixed top-16 right-4 max-w-xs w-full bg-white/95 backdrop-blur-md border border-gray-300 rounded-lg shadow-lg p-4 text-gray-900 hidden z-50">
+    <div class="flex justify-between items-center mb-2">
+        <h3 class="font-semibold text-lg">Notifications</h3>
+        <button id="closeNotifPopup" class="text-gray-500 hover:text-gray-700">&times;</button>
+    </div>
+    <div id="notificationsList" class="space-y-2 max-h-64 overflow-y-auto">
+        <!-- Notifications dynamiques ici -->
+    </div>
+    </div>
+
 </body>
 </html>
 

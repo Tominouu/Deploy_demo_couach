@@ -55,6 +55,47 @@ def init_db():
             FOREIGN KEY (conversation_id) REFERENCES conversations(id)
         )
     ''')
+
+    # Nouvelle table pour les demandes d'amitié
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS friend_requests (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            sender_username TEXT NOT NULL,
+            receiver_username TEXT NOT NULL,
+            status TEXT DEFAULT 'pending',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (sender_username) REFERENCES users(username),
+            FOREIGN KEY (receiver_username) REFERENCES users(username),
+            UNIQUE(sender_username, receiver_username)
+        )
+    ''')
+    
+    # Nouvelle table pour les amitiés
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS friendships (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user1_username TEXT NOT NULL,
+            user2_username TEXT NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user1_username) REFERENCES users(username),
+            FOREIGN KEY (user2_username) REFERENCES users(username),
+            UNIQUE(user1_username, user2_username)
+        )
+    ''')
+    
+    # Nouvelle table pour les notifications
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS notifications (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_username TEXT NOT NULL,
+            type TEXT NOT NULL,
+            message TEXT NOT NULL,
+            related_id INTEGER,
+            is_read BOOLEAN DEFAULT FALSE,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_username) REFERENCES users(username)
+        )
+    ''')
     
     conn.commit()
     conn.close()
@@ -505,6 +546,301 @@ def test():
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
+
+@app.route('/get_username')
+def get_username():
+    if 'user' in session:
+        return jsonify({'username': session['user']})
+    return jsonify({'username': None})
+
+
+# Gestion des collaborateurs
+@app.route('/search_users', methods=['GET'])
+def search_users():
+    if 'user' not in session:
+        return jsonify({'error': 'Non connecté'}), 401
+    
+    query = request.args.get('q', '').strip()
+    current_user = session['user']
+    
+    if not query or len(query) < 2:
+        return jsonify([])
+    
+    try:
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        
+        # Rechercher les utilisateurs (excluant l'utilisateur actuel)
+        c.execute('''
+            SELECT username FROM users 
+            WHERE username LIKE ? AND username != ?
+            LIMIT 10
+        ''', (f'%{query}%', current_user))
+        
+        users = [{'username': row[0]} for row in c.fetchall()]
+        conn.close()
+        
+        return jsonify(users)
+    except Exception as e:
+        print(f"Erreur recherche utilisateurs: {e}")
+        return jsonify([])
+
+@app.route('/send_friend_request', methods=['POST'])
+def send_friend_request():
+    if 'user' not in session:
+        return jsonify({'error': 'Non connecté'}), 401
+    
+    data = request.get_json()
+    sender = session['user']
+    receiver = data.get('username')
+    
+    if not receiver or sender == receiver:
+        return jsonify({'error': 'Destinataire invalide'}), 400
+    
+    try:
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        
+        # Vérifier si l'utilisateur existe
+        c.execute('SELECT username FROM users WHERE username = ?', (receiver,))
+        if not c.fetchone():
+            conn.close()
+            return jsonify({'error': 'Utilisateur introuvable'}), 404
+        
+        # Vérifier si une demande existe déjà
+        c.execute('''
+            SELECT status FROM friend_requests 
+            WHERE (sender_username = ? AND receiver_username = ?) 
+            OR (sender_username = ? AND receiver_username = ?)
+        ''', (sender, receiver, receiver, sender))
+        
+        existing = c.fetchone()
+        if existing:
+            conn.close()
+            return jsonify({'error': 'Demande déjà envoyée ou vous êtes déjà amis'}), 400
+        
+        # Vérifier si ils sont déjà amis
+        c.execute('''
+            SELECT id FROM friendships 
+            WHERE (user1_username = ? AND user2_username = ?) 
+            OR (user1_username = ? AND user2_username = ?)
+        ''', (sender, receiver, receiver, sender))
+        
+        if c.fetchone():
+            conn.close()
+            return jsonify({'error': 'Vous êtes déjà amis'}), 400
+        
+        # Envoyer la demande
+        now_paris = datetime.datetime.now(ZoneInfo("Europe/Paris"))
+        c.execute('''
+            INSERT INTO friend_requests (sender_username, receiver_username, created_at)
+            VALUES (?, ?, ?)
+        ''', (sender, receiver, now_paris))
+        
+        request_id = c.lastrowid
+        
+        # Créer une notification
+        c.execute('''
+            INSERT INTO notifications (user_username, type, message, related_id, created_at)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (receiver, 'friend_request', f'{sender} vous a envoyé une demande d\'ami', request_id, now_paris))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'success': True, 'message': 'Demande envoyée'})
+    
+    except Exception as e:
+        print(f"Erreur envoi demande: {e}")
+        return jsonify({'error': 'Erreur serveur'}), 500
+
+@app.route('/notifications', methods=['GET'])
+def get_notifications():
+    if 'user' not in session:
+        return jsonify([])
+    
+    user = session['user']
+    
+    try:
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        
+        c.execute('''
+            SELECT id, type, message, related_id, is_read, created_at
+            FROM notifications
+            WHERE user_username = ?
+            ORDER BY created_at DESC
+            LIMIT 20
+        ''', (user,))
+        
+        notifications = []
+        for row in c.fetchall():
+            notifications.append({
+                'id': row[0],
+                'type': row[1],
+                'message': row[2],
+                'related_id': row[3],
+                'is_read': row[4],
+                'created_at': row[5]
+            })
+        
+        conn.close()
+        return jsonify(notifications)
+    
+    except Exception as e:
+        print(f"Erreur notifications: {e}")
+        return jsonify([])
+
+@app.route('/respond_friend_request', methods=['POST'])
+def respond_friend_request():
+    if 'user' not in session:
+        return jsonify({'error': 'Non connecté'}), 401
+    
+    data = request.get_json()
+    request_id = data.get('request_id')
+    action = data.get('action')  # 'accept' ou 'reject'
+    user = session['user']
+    
+    if not request_id or action not in ['accept', 'reject']:
+        return jsonify({'error': 'Données invalides'}), 400
+    
+    try:
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        
+        # Vérifier la demande
+        c.execute('''
+            SELECT sender_username, receiver_username, status
+            FROM friend_requests
+            WHERE id = ? AND receiver_username = ?
+        ''', (request_id, user))
+        
+        request_data = c.fetchone()
+        if not request_data:
+            conn.close()
+            return jsonify({'error': 'Demande introuvable'}), 404
+        
+        sender, receiver, status = request_data
+        
+        if status != 'pending':
+            conn.close()
+            return jsonify({'error': 'Demande déjà traitée'}), 400
+        
+        now_paris = datetime.datetime.now(ZoneInfo("Europe/Paris"))
+        
+        if action == 'accept':
+            # Accepter la demande
+            c.execute('''
+                UPDATE friend_requests 
+                SET status = 'accepted' 
+                WHERE id = ?
+            ''', (request_id,))
+            
+            # Créer l'amitié
+            c.execute('''
+                INSERT INTO friendships (user1_username, user2_username, created_at)
+                VALUES (?, ?, ?)
+            ''', (sender, receiver, now_paris))
+            
+            # Notifier l'expéditeur
+            c.execute('''
+                INSERT INTO notifications (user_username, type, message, created_at)
+                VALUES (?, ?, ?, ?)
+            ''', (sender, 'friend_accepted', f'{receiver} a accepté votre demande d\'ami', now_paris))
+            
+            message = 'Demande acceptée'
+        else:
+            # Rejeter la demande
+            c.execute('''
+                UPDATE friend_requests 
+                SET status = 'rejected' 
+                WHERE id = ?
+            ''', (request_id,))
+            
+            message = 'Demande rejetée'
+        
+        # Marquer la notification comme lue
+        c.execute('''
+            UPDATE notifications 
+            SET is_read = TRUE 
+            WHERE related_id = ? AND user_username = ?
+        ''', (request_id, user))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'success': True, 'message': message})
+    
+    except Exception as e:
+        print(f"Erreur réponse demande: {e}")
+        return jsonify({'error': 'Erreur serveur'}), 500
+
+@app.route('/mark_notification_read', methods=['POST'])
+def mark_notification_read():
+    if 'user' not in session:
+        return jsonify({'error': 'Non connecté'}), 401
+    
+    data = request.get_json()
+    notification_id = data.get('notification_id')
+    user = session['user']
+    
+    try:
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        
+        c.execute('''
+            UPDATE notifications 
+            SET is_read = TRUE 
+            WHERE id = ? AND user_username = ?
+        ''', (notification_id, user))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'success': True})
+    
+    except Exception as e:
+        print(f"Erreur marquer notification: {e}")
+        return jsonify({'error': 'Erreur serveur'}), 500
+
+@app.route('/get_friends', methods=['GET'])
+def get_friends():
+    if 'user' not in session:
+        return jsonify([])
+    
+    user = session['user']
+    
+    try:
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        
+        c.execute('''
+            SELECT 
+                CASE 
+                    WHEN user1_username = ? THEN user2_username
+                    ELSE user1_username
+                END as friend_username,
+                created_at
+            FROM friendships
+            WHERE user1_username = ? OR user2_username = ?
+            ORDER BY created_at DESC
+        ''', (user, user, user))
+        
+        friends = []
+        for row in c.fetchall():
+            friends.append({
+                'username': row[0],
+                'created_at': row[1]
+            })
+        
+        conn.close()
+        return jsonify(friends)
+    
+    except Exception as e:
+        print(f"Erreur récupération amis: {e}")
+        return jsonify([])
+
+
 
 if __name__ =='__main__':
     print(datetime.datetime.now(ZoneInfo("Europe/Paris")))
