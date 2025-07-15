@@ -14,6 +14,11 @@ app = Flask(__name__)
 app.secret_key = 'super-secret-key'
 app.permanent_session_lifetime = timedelta(hours=1)
 
+@app.before_request
+def force_https():
+    if request.scheme != 'https':
+        return redirect(request.url.replace("http://", "https://"), code=301) 
+
 def init_db():
     conn = sqlite3.connect('users.db')  # Une seule base de données
     c = conn.cursor()
@@ -465,6 +470,34 @@ def register():
         return render_template('login.html', error="Nom d'utilisateur déjà pris")
     #return redirect('/login')
 
+@app.route('/profile', methods=['GET', 'POST'])
+def profile():
+    if 'user' not in session:
+        return redirect('/login')
+    if request.method == 'POST':
+        new_username = request.form['username']
+        new_password = request.form['password']
+        if new_password:
+            new_password = generate_password_hash(new_password)
+        else:
+            new_password = None
+        
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        
+        if new_password:
+            c.execute("UPDATE users SET username = ?, password = ? WHERE username = ?", (new_username, new_password, session['user']))
+        else:
+            c.execute("UPDATE users SET username = ? WHERE username = ?", (new_username, session['user']))
+        
+        conn.commit()
+        conn.close()
+        
+        session['user'] = new_username
+        flash('Profil mis à jour avec succès.', 'success')
+        return redirect('/profile')
+    return render_template('profile.html', user=session['user'] )
+
 @app.route('/test', methods=['GET', 'POST'])
 def test():
         return render_template('test-brain.html')
@@ -476,4 +509,4 @@ def page_not_found(e):
 if __name__ =='__main__':
     print(datetime.datetime.now(ZoneInfo("Europe/Paris")))
     init_db()
-    app.run(host='0.0.0.0', port=8080)
+    app.run(host='0.0.0.0', port=8080, ssl_context=('cert.pem', 'key.pem'))  # Utiliser SSL pour la sécurité

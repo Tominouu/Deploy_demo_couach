@@ -13,3 +13,6 @@ instance/
 
 # VS Code
 .vscode/
+
+cert.pem
+key.pem
