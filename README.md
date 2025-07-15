@@ -195,6 +195,7 @@ Après tests :
 ## 🧪 Update 15 Juillet
 
 - Corrections des **bugs** liés au **copier-coller** du bloc de code.
+- Ajustement de l'interface **utilisateur** pour un meilleur **confort.**
 - 
 
 

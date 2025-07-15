@@ -60,24 +60,48 @@
         
         <!-- footer sidebar -->
         <div class="p-4 border-t border-white/20 sidebar-hide-when-collapsed">
-            <div id="userInfo" class="flex items-center space-x-3">
-                <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+            <div id="userInfo" class="flex items-center space-x-3 relative py-2 px-2 bg-slate-900/60 rounded-xl shadow-md">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-900 rounded-full flex items-center justify-center border-2 border-white/30 shadow">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle cx="12" cy="8" r="4" stroke-width="2"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 20c0-3.314 3.134-6 7-6s7 2.686 7 6"/>
                     </svg>
                 </div>
-                <div id="userDetails">
-                    <p class="text-white text-sm font-medium">{{user}}</p>
-                    <p class="text-white/60 text-xs">En ligne</p>
-                </div>
-                <button title="Déconnexion" onclick="location.href='{{ url_for('logout') }}'" class="ml-2 p-1 rounded text-white/60 hover:text-red-400 p-1" style="margin-left: 160px; margin-top: 5px;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="white" stroke-width="2" 
-                            stroke-linecap="round" stroke-linejoin="round" class="feather feather-log-out">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                        <polyline points="16 17 21 12 16 7" />
-                        <line x1="21" y1="12" x2="9" y2="12" />
+                <div id="userDetails" class="flex flex-col cursor-pointer select-none group relative">
+                    <div class="flex items-center space-x-2" id="userMenuTriggerWrapper">
+                        <span class="text-white text-base font-semibold" id="userMenuTrigger">{{user}}</span>
+                        <svg class="w-4 h-4 text-white/70 group-hover:text-blue-400 transition-transform duration-200 transform" id="userMenuChevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
                         </svg>
-                    </button>
+                    </div>
+                    <span class="text-green-400 text-xs font-medium flex items-center mt-0.5">
+                        <span class="w-2 h-2 bg-green-400 rounded-full inline-block mr-1 animate-pulse"></span>En ligne
+                    </span>
+                    <!-- Menu déroulant utilisateur -->
+                    <div id="userDropdown" class="hidden absolute left-0 bottom-10 bg-slate-800 text-white rounded-lg shadow-lg py-2 w-48 z-50 animate-fade-in" style="bottom: 55px;">
+                        <div class="px-4 py-2 text-xs text-slate-400 font-semibold uppercase tracking-wider border-b border-slate-700 mb-1">Menu utilisateur</div>
+                        <a href="#" class="block px-4 py-2 hover:bg-slate-700 transition flex items-center">
+                            <svg class="w-4 h-4 mr-2 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                            Paramètres du compte
+                        </a>
+                        <a href="#" class="block px-4 py-2 hover:bg-slate-700 transition flex items-center">
+                            <svg class="w-4 h-4 mr-2 text-green-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path stroke-linecap="round" stroke-linejoin="round" d="M5.5 21a7.5 7.5 0 0 1 13 0"/></svg>
+                            Mon profil
+                        </a>
+                        <a href="{{ url_for('logout') }}" class="block px-4 py-2 hover:bg-red-500 transition flex items-center">
+                            <svg class="w-4 h-4 mr-2 text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                            Déconnexion
+                        </a>
+                    </div>
+                </div>
+                <button title="Déconnexion" onclick="location.href='{{ url_for('logout') }}'" class="ml-auto p-1 rounded text-white/60 hover:text-red-400 transition" style="margin-left: 125px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="white" stroke-width="2" 
+                        stroke-linecap="round" stroke-linejoin="round" class="feather feather-log-out">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>
+                </button>
             </div>
         </div>
     </div>
@@ -154,7 +178,7 @@
                         class="btn-primary px-6 py-3 rounded-xl text-white font-medium flex items-center space-x-2"
                     >
                         <span>Envoyer</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
                         </svg>
                     </button>
@@ -201,6 +225,29 @@
             sidebar.classList.remove('collapsed');
         }
     });
+    </script>
+    <script>
+    // Menu déroulant utilisateur
+    const userMenuTrigger = document.getElementById('userMenuTrigger');
+    const userDropdown = document.getElementById('userDropdown');
+    const userMenuChevron = document.getElementById('userMenuChevron');
+    const userMenuTriggerWrapper = document.getElementById('userMenuTriggerWrapper');
+    if (userMenuTrigger && userDropdown && userMenuTriggerWrapper) {
+        userMenuTriggerWrapper.addEventListener('click', (e) => {
+            e.stopPropagation();
+            userDropdown.classList.toggle('hidden');
+            userMenuChevron.classList.toggle('rotate-180');
+        });
+        document.addEventListener('click', (e) => {
+            if (!userDropdown.classList.contains('hidden')) {
+                userDropdown.classList.add('hidden');
+                userMenuChevron.classList.remove('rotate-180');
+            }
+        });
+        userDropdown.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+    }
     </script>
 </body>
 </html>
