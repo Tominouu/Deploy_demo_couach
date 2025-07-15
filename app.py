@@ -495,8 +495,8 @@ def profile():
         
         session['user'] = new_username
         flash('Profil mis à jour avec succès.', 'success')
-        return redirect('/profile')
-    return render_template('profile.html', user=session['user'] )
+        return redirect('/')
+    return render_template('profile.html', user=session['user'])
 
 @app.route('/test', methods=['GET', 'POST'])
 def test():
