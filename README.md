@@ -6,6 +6,10 @@ Ce projet a pour but de **tester, comparer et intégrer différents modèles LLM
 
 ---
 
+### POUR COUPER LE SERVEUR
+
+- `pkill -f app.py`
+
 ### ⚠️ SI L'IA NE RÉPOND PLUS VOICI LA DÉMARCHE À SUIVRE
 
 ## Méthode Simple:
