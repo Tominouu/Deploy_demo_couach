@@ -93,21 +93,6 @@
         }
 
         // Attendre que le DOM soit complètement chargé
-        document.addEventListener('DOMContentLoaded', () => {
-            // Initialisation des éléments DOM
-            if (!initializeElements()) {
-                console.error('Éléments du formulaire non trouvés');
-                return;
-            }
-
-            // Initialisation des événements
-            initializeEventListeners();
-
-            // Initialisation de l'interface
-            addWelcomeMessage();
-            messageInput.focus();
-        });
-
         document.addEventListener('DOMContentLoaded', async () => {
             // Initialisation des éléments DOM
             if (!initializeElements()) {
@@ -128,6 +113,9 @@
             if (typeof hljs !== 'undefined') {
                 hljs.highlightAll();
             }
+
+            // Ajout des boutons de copie sur les blocs de code déjà présents (ex: après reload)
+            addCopyButtonsToCodeBlocks();
         });
 
 
@@ -437,6 +425,8 @@
                 chat.messages.forEach(msg => {
                     addMessageToUI(msg.content, msg.isUser, false);
                 });
+                // Ajout des boutons de copie après affichage des messages en cache
+                addCopyButtonsToCodeBlocks();
                 return;
             }
 
@@ -455,6 +445,8 @@
                     addMessageToUI(userMsg.content, userMsg.isUser, false);
                     addMessageToUI(aiMsg.content, aiMsg.isUser, false);
                 });
+                // Ajout des boutons de copie après affichage des messages chargés
+                addCopyButtonsToCodeBlocks();
             } catch (error) {
                 console.error('Erreur lors du chargement de l\'historique:', error);
                 addWelcomeMessage();
@@ -862,10 +854,14 @@ function fallbackCopyTextToClipboard(text, btn) {
         textarea.select();
         document.execCommand('copy');
         document.body.removeChild(textarea);
-        btn.textContent = 'Copié !';
-        setTimeout(() => btn.textContent = 'Copier', 1200);
+        if (btn) {
+            btn.textContent = 'Copié !';
+            setTimeout(() => btn.textContent = 'Copier', 1200);
+        }
     } catch (err) {
-        btn.textContent = 'Erreur';
-        setTimeout(() => btn.textContent = 'Copier', 1200);
+        if (btn) {
+            btn.textContent = 'Erreur';
+            setTimeout(() => btn.textContent = 'Copier', 1200);
+        }
     }
 }

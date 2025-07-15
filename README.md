@@ -192,6 +192,14 @@ Après tests :
 
 ---
 
+## 🧪 Update 15 Juillet
+
+- Corrections des **bugs** liés au **copier-coller** du bloc de code.
+- 
+
+
+---
+
 
 
 
