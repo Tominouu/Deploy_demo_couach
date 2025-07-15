@@ -2,7 +2,7 @@
 
 ## 📅 Contexte & Objectifs
 
-Ce projet a pour but de **tester, comparer et intégrer différents modèles LLM** (Large Language Models) exécutés **en local** sur serveur sans GPU. Le tout sera lié sur une **interface web** style "ChatGPT", accessible par tous les utilisateurs connectés sur le réseau via cet **IP:** http://172.16.2.81:8294/. L'objectif est de trouver un compromis optimal entre **performances**, **consommation**, et **réactivité**.
+Ce projet a pour but de **tester, comparer et intégrer différents modèles LLM** (Large Language Models) exécutés **en local** sur serveur sans GPU. Le tout sera lié sur une **interface web** style "ChatGPT", accessible par tous les utilisateurs connectés sur le réseau via cet **IP:** https://172.16.2.81:8294/. L'objectif est de trouver un compromis optimal entre **performances**, **consommation**, et **réactivité**.
 
 ---
 
