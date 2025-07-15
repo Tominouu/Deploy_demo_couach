@@ -200,7 +200,8 @@ Après tests :
 
 - Corrections des **bugs** liés au **copier-coller** du bloc de code.
 - Ajustement de l'interface **utilisateur** pour un meilleur **confort.**
-- 
+- Page **profil** où l'on peut modifier son **mot de passe** et son **nom d'utilisateur.**
+- Ajout de la **fonctionnalité** collaborateurs, on peut envoyer une demande d'ami.
 
 
 ---

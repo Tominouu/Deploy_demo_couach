@@ -157,14 +157,14 @@ document.addEventListener('DOMContentLoaded', () => {
     #search-results {
       position: absolute;
       background: white;
-      border: 1px solid #ccc;
-      width: 300px;
+      border: 1px solid whitesmoke;
+      width: 325px;
       max-height: 300px;
       overflow-y: auto;
       z-index: 1000;
       top: 40px;
       left: 50%;
-      transform: translateX(-50%);
+      transform: translateX(-58%);
       box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
     .user-result {
