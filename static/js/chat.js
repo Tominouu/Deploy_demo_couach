@@ -220,20 +220,20 @@
             const chatItem = document.createElement('div');
             chatItem.className = 'chat-item p-3 rounded-lg text-white text-sm';
             chatItem.dataset.chatId = chatId;
-            let timestamp = '';
+            let thetime = '';
             if (chats[chatId] && chats[chatId].createdAt) {
                 const date = chats[chatId].createdAt;
                 const jours = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
                 const mois = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
                 const heure = date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-                timestamp = `${jours[date.getDay()]} ${date.getDate()} ${mois[date.getMonth()]} ${date.getFullYear()} | ${heure}`;
+                thetime = `${jours[date.getDay()]} ${date.getDate()} ${mois[date.getMonth()]} ${date.getFullYear()} | ${heure}`;
             }
 
             chatItem.innerHTML = `
                 <div class="flex items-center justify-between">
                     <div class="flex-1 truncate">
                         <p class="font-medium truncate">${title}</p>
-                        <p class="text-white/60 text-xs">${timestamp}</p>
+                        <p class="text-white/60 text-xs">${thetime}</p>
                     </div>
                     <button class="edit-chat text-white/60 hover:text-blue-400 p-1 mr-2" data-chat-id="${chatId}" style="margin-top: 1px;">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
