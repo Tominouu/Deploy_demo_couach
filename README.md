@@ -37,7 +37,7 @@ Ce projet a pour but de **tester, comparer et intégrer différents modèles LLM
 - Ensuite tapez:
  `python app.py`
 - C'est censé avoir lancé le serveur, si jamais il vous dit que le port est déjà pris, alors le serveur est déjà lancé.
-- Si jamais vous êtes sur que le serveur est lancé et que la page n'est pas accessible, vérifiez les règles **NAT** du serveur, que les ports autorisés sur la **VM**:
+- Si jamais vous êtes sur que le serveur est lancé et que la page n'est pas accessible, vérifiez les règles **NAT** du serveur, que les ports sont autorisés sur la **VM**:
  `sudo ufw allow 8080`
 
 
