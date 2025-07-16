@@ -841,6 +841,50 @@ def get_friends():
         return jsonify([])
 
 
+@app.route('/collaborators')
+def collaborators():
+    if 'user' not in session:
+        return redirect('/login')
+    return render_template('collaborators.html', user=session['user'])
+
+@app.route('/remove_friend', methods=['POST'])
+def remove_friend():
+    if 'user' not in session:
+        return jsonify({'error': 'Non connecté'}), 401
+    
+    data = request.get_json()
+    friend_username = data.get('friend_username')
+    current_user = session['user']
+    
+    if not friend_username or friend_username == current_user:
+        return jsonify({'error': 'Ami invalide'}), 400
+    
+    try:
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        
+        # Remove friendship
+        c.execute('''
+            DELETE FROM friendships 
+            WHERE (user1_username = ? AND user2_username = ?) 
+            OR (user1_username = ? AND user2_username = ?)
+        ''', (current_user, friend_username, friend_username, current_user))
+        
+        # Remove any pending friend requests
+        c.execute('''
+            DELETE FROM friend_requests 
+            WHERE (sender_username = ? AND receiver_username = ?) 
+            OR (sender_username = ? AND receiver_username = ?)
+        ''', (current_user, friend_username, friend_username, current_user))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'success': True, 'message': 'Collaborateur supprimé'})
+    
+    except Exception as e:
+        print(f"Erreur suppression ami: {e}")
+        return jsonify({'error': 'Erreur serveur'}), 500
 
 if __name__ =='__main__':
     print(datetime.datetime.now(ZoneInfo("Europe/Paris")))

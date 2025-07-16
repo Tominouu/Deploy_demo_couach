@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collaborateurs - CouachGPT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/chat.css') }}">
+    <script src="{{ url_for('static', filename='js/collab-page.js') }}"></script>
+</head>
+<body class="yacht-hero h-screen flex overflow-hidden">
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar glass-dark flex flex-col">
+        <div class="p-4 border-b border-white/20">
+            <div class="flex items-center justify-between">
+                <div class="text-center mb-4 floating-animation">
+                    <img src="https://couach.com/wp-content/uploads/2019/04/Couach-Logo-blanc-WEB-768x170.png" alt="Logo Couach" class="h-8">
+                </div>
+                <button onclick="location.href='/'" class="text-white/80 hover:text-white p-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <div class="p-4 border-b border-white/20">
+            <button onclick="location.href='/'" class="w-full bg-white/20 hover:bg-white/30 text-white rounded-lg py-2 px-3 text-sm font-medium transition-colors">
+                ← Retour au chat
+            </button>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto p-4">
+            <div class="space-y-4">
+                <div class="text-white/80 text-sm font-medium">Menu</div>
+                <a href="/" class="block text-white/60 hover:text-white py-2 px-3 rounded-lg hover:bg-white/10 transition">
+                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                    </svg>
+                    Chat IA
+                </a>
+                <a href="/collaborators" class="block text-white py-2 px-3 rounded-lg bg-white/20 transition">
+                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m4-7a4 4 0 01-8 0 4 4 0 018 0zm0 0a4 4 0 01-8 0 4 4 0 018 0z"></path>
+                    </svg>
+                    Collaborateurs
+                </a>
+                <a href="/profile" class="block text-white/60 hover:text-white py-2 px-3 rounded-lg hover:bg-white/10 transition">
+                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle cx="12" cy="7" r="4"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.5 21a7.5 7.5 0 0 1 13 0"/>
+                    </svg>
+                    Mon profil
+                </a>
+            </div>
+        </div>
+        
+        <div class="p-4 border-t border-white/20">
+            <div class="flex items-center space-x-3 py-2 px-2 bg-slate-900/60 rounded-xl">
+                <div class="w-8 h-8 bg-gradient-to-br from-slate-700 to-slate-600 rounded-full flex items-center justify-center">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle cx="12" cy="8" r="4"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 20c0-3.314 3.134-6 7-6s7 2.686 7 6"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="text-white text-sm font-medium">{{ user }}</div>
+                    <div class="text-green-400 text-xs flex items-center">
+                        <span class="w-1.5 h-1.5 bg-green-400 rounded-full mr-1"></span>En ligne
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col">
+        <!-- Header -->
+        <div class="glass-effect p-4 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800">Collaborateurs</h1>
+                    <p class="text-sm text-gray-600">Gérez vos collaborateurs et invitez-les à vos conversations</p>
+                </div>
+                <div class="flex space-x-3">
+                    <button id="addCollaboratorBtn" class="btn-primary px-4 py-2 rounded-xl text-white px-4 py-2 rounded-lg font-medium transition flex items-center space-x-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        <span>Ajouter un collaborateur</span>
+                    </button>
+                    <a href="/admin" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition">
+                        Admin
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Search Bar -->
+        <div class="glass-effect p-4 border-b border-gray-200">
+            <div class="max-w-md">
+                <div class="relative">
+                    <input 
+                        id="searchCollaborators" 
+                        type="text" 
+                        placeholder="Rechercher un collaborateur..."
+                        class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    >
+                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-4.35-4.35"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Collaborators List -->
+        <div class="flex-1 overflow-y-auto p-6">
+            <div class="max-w-4xl mx-auto">
+                <div id="collaboratorsList" class="space-y-4">
+                    <!-- Collaborators will be loaded here -->
+                </div>
+                
+                <!-- Empty State -->
+                <div id="emptyState" class="text-center py-12 hidden">
+                    <svg class="w-16 h-16 text-white-400 mx-auto mb-4" fill="none" stroke="white" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m4-7a4 4 0 01-8 0 4 4 0 018 0zm0 0a4 4 0 01-8 0 4 4 0 018 0z"></path>
+                    </svg>
+                    <h3 class="text-lg font-medium text-white-900 mb-2" style="color: white;">Aucun collaborateur</h3>
+                    <p class="text-white-600 mb-4" style="color: white;">Vous n'avez pas encore de collaborateurs. Ajoutez-en un pour commencer à collaborer!</p>
+                    <button onclick="document.getElementById('addCollaboratorBtn').click()" class="btn-primary px-6 py-3 rounded-xl text-white px-4 py-2 rounded-lg font-medium transition">
+                        Ajouter mon premier collaborateur
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add Collaborator Modal -->
+    <div id="addCollaboratorModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold">Ajouter un collaborateur</h3>
+                <button id="closeAddModal" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nom d'utilisateur</label>
+                    <input 
+                        id="collaboratorUsername" 
+                        type="text" 
+                        placeholder="Entrez le nom d'utilisateur..."
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black-400"
+                    >
+                    <div id="userSearchResults" class="mt-2 space-y-1"></div>
+                </div>
+                <div class="flex space-x-3 justify-end">
+                    <button id="cancelAddCollaborator" class="px-4 py-2 text-gray-600 hover:text-gray-800 transition">
+                        Annuler
+                    </button>
+                    <button id="sendFriendRequest" class="btn-primary px-6 py-3 rounded-xl text-white rounded-lg transition">
+                        Envoyer la demande
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Remove Collaborator Modal -->
+    <div id="removeCollaboratorModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold">Supprimer le collaborateur</h3>
+                <button id="closeRemoveModal" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <p class="text-gray-600 mb-6">Êtes-vous sûr de vouloir supprimer <span id="collaboratorToRemove" class="font-medium"></span> de vos collaborateurs?</p>
+            <div class="flex space-x-3 justify-end">
+                <button id="cancelRemoveCollaborator" class="px-4 py-2 text-gray-600 hover:text-gray-800 transition">
+                    Annuler
+                </button>
+                <button id="confirmRemoveCollaborator" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition">
+                    Supprimer
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div id="toastNotification" class="fixed bottom-5 right-5 z-50 hidden bg-white border border-gray-200 shadow-lg rounded-lg px-4 py-3 flex items-center space-x-2">
+        <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z"></path>
+        </svg>
+        <span id="toastMessage" class="text-sm text-gray-700"></span>
+    </div>
+    
+    <script>
+        const loggedInUser = {{ user|tojson }};
+        document.addEventListener('DOMContentLoaded', function() {
+            initCollaborators();
+        });
+    </script>
+</body>
+</html>
