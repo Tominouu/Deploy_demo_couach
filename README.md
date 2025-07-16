@@ -196,12 +196,20 @@ Après tests :
 
 ---
 
-## 🧪 Update 15 Juillet
+## 🧪 Update 15 Juillet - Nouvelles Features
 
 - Corrections des **bugs** liés au **copier-coller** du bloc de code.
 - Ajustement de l'interface **utilisateur** pour un meilleur **confort.**
 - Page **profil** où l'on peut modifier son **mot de passe** et son **nom d'utilisateur.**
 - Ajout de la **fonctionnalité** collaborateurs, on peut envoyer une demande d'ami.
+
+---
+
+## 🧪 Update 16 Juillet - Feature Collaboration
+
+- Ajout de la page **collaboration** pour consulter les **amis**, envoyer des **demandes** directement depuis cette page.
+- Optimisation et correction des bugs des **notifications.**
+- Amélioration du confort **utilisateur.**
 
 
 ---
