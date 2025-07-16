@@ -1,4 +1,4 @@
-// static/js/multi.js
+document.addEventListener("DOMContentLoaded", () => {
 (() => {
   const socket = io();
   const ROOM_ID = window.location.pathname.split("/").pop();
@@ -43,8 +43,8 @@ function addMsg(user, msg, isAI=false) {
     div.className = `chat-message ${isAI ? "message-ai" : ""}`;
     div.innerHTML = `
         <div class="flex items-start space-x-3">
-            <div class="text-xs font-bold w-20">${user}</div>
-            <div class="flex-1">${msg}</div>
+            <div class="text-xs font-bold w-20 text-white">${user}</div>
+            <div class="flex-1 text-white">${msg}</div>
         </div>`;
     messagesDiv.appendChild(div);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
@@ -73,3 +73,4 @@ function send(is_for_ai) {
 sendChatBtn.onclick = () => send(false);
 sendIABtn.onclick   = () => send(true);
 })();
+});
