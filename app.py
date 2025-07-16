@@ -438,6 +438,15 @@ def admin_action():
             conn.commit()
             conn.close()
             return jsonify({'message': "Table historique nettoyée."})
+        elif action == 'clean_friends':
+            conn = sqlite3.connect('users.db')
+            c = conn.cursor()
+            c.execute('DELETE FROM friend_requests')
+            c.execute('DELETE FROM friendships')
+            c.execute('DELETE FROM notifications')
+            conn.commit()
+            conn.close()
+            return jsonify({'message': "Table Collaborateurs nettoyée."})
         elif action == 'restart_model':
             os.system('sudo systemctl restart ollama')
             return jsonify({'message': "Service Ollama redémarré. Les modèles seront rechargés à la prochaine requête."})
