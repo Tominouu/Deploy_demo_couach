@@ -8,6 +8,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- Fonctions utilitaires ---
 
+  let lastNotifIds = new Set();
+
+  async function checkNewNotifications() {
+    const data = await fetchJSON('/notifications');
+    if (!data) return;
+
+    data.forEach(notif => {
+      if (!lastNotifIds.has(notif.id) && !notif.is_read) {
+        showToast(notif.message);  // Affiche le toast
+        notifBadge.classList.remove('hidden'); // Montre le badge
+        lastNotifIds.add(notif.id);
+      }
+    });
+  }
+
+  // Lancer la vérif toutes les 10 secondes
+  setInterval(checkNewNotifications, 10000);
+
+  // Lancer au chargement
+  checkNewNotifications();
+
+
+  function showToast(message) {
+  const toast = document.getElementById('toastNotification');
+  const toastMsg = document.getElementById('toastMessage');
+
+  toastMsg.textContent = message;
+  toast.classList.remove('hidden');
+
+  // Masquer après 4 secondes (durée de l'animation)
+  setTimeout(() => {
+    toast.classList.add('hidden');
+  }, 4000);
+}
+
+
   // Afficher popup notification temporaire
   function showToast(message) {
     const toast = document.createElement('div');
@@ -117,6 +153,26 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.reject-btn').forEach(btn => {
       btn.onclick = () => respondFriendRequest(btn.dataset.requestId, 'reject');
     });
+    // Marquer comme lu quand on clique sur une notification simple
+    document.querySelectorAll('.notification-item').forEach(item => {
+      const notifId = item.dataset.id;
+      const isRequest = item.querySelector('.notification-actions');
+
+      if (!isRequest) {
+        item.addEventListener('click', async () => {
+          if (item.classList.contains('unread')) {
+            await fetchJSON('/mark_notification_read', {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({ notification_id: notifId })
+            });
+            item.classList.remove('unread');
+            item.classList.add('read');
+          }
+        });
+      }
+});
+
   }
 
   // Afficher / cacher popup notifications

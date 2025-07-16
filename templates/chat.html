@@ -101,7 +101,7 @@
                         </a>
                     </div>
                 </div>
-                <button title="Déconnexion" onclick="location.href='{{ url_for('logout') }}'" class="ml-auto p-1 rounded text-white/60 hover:text-red-400 transition" style="margin-left: 125px;">
+                <button title="Déconnexion" onclick="location.href='{{ url_for('logout') }}'" class="ml-auto p-1 rounded text-white/60 hover:text-red-400 transition" style="margin-left: 235px; position: absolute;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="white" stroke-width="2" 
                         stroke-linecap="round" stroke-linejoin="round" class="feather feather-log-out">
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -237,6 +237,16 @@
     <div id="notifications-popup" class="hidden fixed top-16 right-4 w-96 max-h-[70vh] overflow-y-auto bg-white border border-gray-300 shadow-lg rounded-lg z-50">
     <div id="notifications-list" class="p-4 space-y-2"></div>
     </div>
+    <!-- Toast Notification -->
+    <div id="toastNotification" 
+        class="fixed bottom-5 right-5 z-50 hidden bg-white border border-gray-200 shadow-lg rounded-lg px-4 py-3 flex items-center space-x-2 animate-fade-in-out">
+    <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" 
+        viewBox="0 0 24 24">
+        <path d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z" />
+    </svg>
+    <span id="toastMessage" class="text-sm text-gray-700"></span>
+    </div>
+
 
     <script>
     const loggedInUser = {{ user|tojson }};
