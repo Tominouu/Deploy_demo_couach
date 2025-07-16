@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CouachGPT</title>
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"
+        integrity="sha384-Gr6Lu2Ajx28mzwyVR8CFkULdCU7kMlZ9UthllibdOSo6qAiN+yXNHqtgdTvFXMT4"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/chat.css') }}">
+    <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/collab.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/multi.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+    
+    
+</head>
+<body class="yacht-hero h-screen flex overflow-hidden">
+    <!-- sidebar historique des chats -->
+    <div id="sidebar" class="sidebar glass-dark flex flex-col">
+        <!-- sidebar en haut -->
+        <div class="p-4 border-b border-white/20">
+            <div class="flex items-center justify-between">
+                <div id="sidebarContent" class="sidebar-hide-when-collapsed">
+                    <div class="text-center mb-8 floating-animation">
+                        <img src="https://couach.com/wp-content/uploads/2019/04/Couach-Logo-blanc-WEB-768x170.png" alt="Logo Couach">
+                    </div>
+                </div>
+                <button id="toggleSidebar" class="text-white/80 hover:text-white p-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <!-- nouveau chat-->
+        <div class="p-4 border-b border-white/20 sidebar-hide-when-collapsed">
+            <button id="newChatBtn" class="w-full bg-white/20 hover:bg-white/30 text-white rounded-lg py-2 px-3 text-sm font-medium transition-colors">
+                <span id="newChatText">+ Nouvelle conversation</span>
+                <span id="newChatIcon" class="hidden">+</span>
+            </button>
+        </div>
+        
+        <!-- Champ de recherche de chats -->
+        <div class="p-4 border-b border-white/20 sidebar-hide-when-collapsed">
+            <div class="relative">
+                <input id="searchChatInput" type="text" placeholder="Rechercher une conversation..." 
+                    class="w-full rounded-lg px-4 py-2 pl-10 text-sm bg-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-blue-400 shadow transition border border-transparent hover:bg-white/30"
+                    style="box-shadow: 0 2px 8px 0 rgba(30,41,59,0.08);" />
+                <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/70 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+            </div>
+        </div>
+        
+        <!-- liste des chats-->
+        <div class="flex-1 overflow-y-auto p-2 sidebar-hide-when-collapsed">
+            <div id="chatHistory" class="space-y-2">
+                <!-- Les chats seront ajoutés dynamiquement ici -->
+            </div>
+        </div>
+        
+        <!-- footer sidebar -->
+        <div class="p-4 border-t border-white/20 sidebar-hide-when-collapsed">
+            <div id="userInfo" class="flex items-center space-x-3 relative py-2 px-2 bg-slate-900/60 rounded-xl shadow-md">
+                <div class="w-10 h-10 bg-gradient-to-br from-slate-700 to-slate-600 rounded-full flex items-center justify-center border-2 border-white/30 shadow">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="rotate: -2deg;">
+                        <circle cx="12" cy="8" r="4" stroke-width="2"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 20c0-3.314 3.134-6 7-6s7 2.686 7 6"/>
+                    </svg>
+                </div>
+                <div id="userDetails" class="flex flex-col cursor-pointer select-none group relative">
+                    <div class="flex items-center space-x-2" id="userMenuTriggerWrapper">
+                        <span class="text-white text-base font-semibold" id="userMenuTrigger">{{user}}</span>
+                        <svg class="w-4 h-4 text-white/70 group-hover:text-blue-400 transition-transform duration-200 transform" id="userMenuChevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+                    <span class="text-green-400 text-xs font-medium flex items-center mt-0.5">
+                        <span class="w-2 h-2 bg-green-400 rounded-full inline-block mr-1 animate-pulse"></span>En ligne
+                    </span>
+                    <!-- Menu déroulant utilisateur -->
+                    <div id="userDropdown" class="hidden absolute left-0 bottom-10 bg-slate-800 text-white rounded-lg shadow-lg py-2 w-48 z-50 animate-fade-in" style="bottom: 55px;">
+                        <div class="px-4 py-2 text-xs text-slate-400 font-semibold uppercase tracking-wider border-b border-slate-700 mb-1">Menu utilisateur</div>
+                        <a href="{{ url_for('collaborators') }}" class="block px-4 py-2 hover:bg-slate-700 transition flex items-center">
+                            <svg class="w-4 h-4 mr-2 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" >
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-3-3.87" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 20H4v-2a4 4 0 013-3.87" />
+                                <circle cx="12" cy="7" r="4" stroke-linecap="round" stroke-linejoin="round" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 01-8 0" />
+                            </svg>
+                            Collaborateurs
+                        </a>
+                        <a href="{{ url_for('profile') }}" class="block px-4 py-2 hover:bg-slate-700 transition flex items-center">
+                            <svg class="w-4 h-4 mr-2 text-green-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path stroke-linecap="round" stroke-linejoin="round" d="M5.5 21a7.5 7.5 0 0 1 13 0"/></svg>
+                            Mon profil
+                        </a>
+                        <a href="{{ url_for('logout') }}" class="block px-4 py-2 hover:bg-red-500 transition flex items-center">
+                            <svg class="w-4 h-4 mr-2 text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                            Déconnexion
+                        </a>
+                    </div>
+                </div>
+                <button title="Déconnexion" onclick="location.href='{{ url_for('logout') }}'" class="ml-auto p-1 rounded text-white/60 hover:text-red-400 transition" style="margin-left: 235px; position: absolute;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="white" stroke-width="2" 
+                        stroke-linecap="round" stroke-linejoin="round" class="feather feather-log-out">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Zone de chat principale -->
+    <div class="flex-1 flex flex-col">
+        <!-- Header principal -->
+        <div class="glass-effect p-4 border-b border-gray-200 flex items-center justify-between">
+            <div>
+                <h1 class="text-xl font-semibold text-gray-800">Assistant IA</h1>
+                <p class="text-sm text-gray-600">Chantier Naval Couach</p>
+            </div>
+                        <!-- Barre de recherche utilisateurs -->
+            <div class="flex-1 mx-6 flex items-center justify-center space-x-4">
+            <input 
+                id="userSearchInput"
+                type="text" 
+                placeholder="Rechercher un collaborateur par pseudo..."
+                class="w-full max-w-md rounded-lg px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800"
+            />
+            <button id="notificationsBtn" 
+                class="relative flex items-center justify-center w-10 h-10 p-2 rounded-full bg-white/80 hover:bg-white shadow transition">
+            <svg class="w-6 h-6 text-gray-700 pointer-events-none" 
+                fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+            </svg>
+            <span id="notifBadge" 
+                    class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse hidden"></span>
+            </button>
+
+            </div>
+            <!-- Résultats de recherche -->
+            <div id="search-results" class="absolute z-50 mt-2 bg-white border border-gray-300 rounded-lg shadow w-full max-w-md"></div>
+
+
+            <a href="{{ url_for('admin') }}" title="Admin" class="ml-auto mr-4 bg-white/80 hover:bg-white text-gray-800 rounded-full p-2 shadow-lg transition-colors flex items-center justify-center">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <rect x="3" y="6" width="18" height="13" rx="2" />
+                    <path d="M9 10h6M9 14h3" />
+                    <path d="M8 3v3M16 3v3" />
+                </svg>
+            </a>
+            <!-- Bouton hamburger pour masquer la sidebar sur mobile -->
+            <button id="closeSidebarBtn" class="md:hidden bg-white/80 rounded-full p-2 shadow-lg" style="display: none;">
+                <svg class="w-7 h-7 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        
+        <!-- Zone des messages -->
+        <div id="chatContainer" class="flex-1 overflow-y-auto p-6 scroll-smooth">
+            <div id="messagesContainer" class="max-w-4xl mx-auto space-y-4">
+                            <!-- typing indicator -->
+            <div id="typingBox" class="text-sm text-gray-500 px-6 mb-2"></div>
+
+            <!-- lock overlay -->
+            <div id="lockOverlay"
+                class="hidden fixed inset-0 bg-black/10 z-50 flex items-center justify-center">
+            <div class="bg-white/90 text-slate-800 rounded-lg px-4 py-2 shadow-lg">
+                🔄 L’IA répond… Veuillez patienter.
+            </div>
+            </div>
+                <!-- Les messages seront ajoutés ici -->
+                
+                <!-- Indicateur de frappe -->
+                <div id="typingIndicator" class="typing-indicator chat-message">
+                    <div class="message-ai rounded-2xl p-4 shadow-sm">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center">
+                                <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                                </svg>
+                            </div>
+                            <div class="flex space-x-1">
+                                <div class="typing-dot"></div>
+                                <div class="typing-dot"></div>
+                                <div class="typing-dot"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Zone de saisie -->
+        <div class="glass-effect border-t border-gray-200 p-4">
+            <div class="max-w-4xl mx-auto">
+                <div class="flex items-end space-x-2">
+                    <textarea id="messageInput" placeholder="Écrivez votre message..."
+                            class="input-field w-full px-4 py-3 rounded-xl min-h-[50px] max-h-32"
+                            rows="1"></textarea>
+                    <button id="sendChatBtn"
+                            class="btn-primary px-4 py-3 rounded-xl text-white font-medium">
+                        💬 Chat
+                    </button>
+                    <button id="sendIABtn"
+                            class="btn-primary px-4 py-3 rounded-xl text-white font-medium">
+                        🤖 IA
+                    </button>
+                </div>
+                <div class="flex items-center justify-between mt-2 text-xs text-gray-500">
+                    <span>Appuyez sur Entrée pour envoyer, Maj+Entrée pour une nouvelle ligne</span>
+                    <span id="charCount">0/2000</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Popup Notifications -->
+    <div id="notifications-popup" class="hidden fixed top-16 right-4 w-96 max-h-[70vh] overflow-y-auto bg-white border border-gray-300 shadow-lg rounded-lg z-50">
+    <div id="notifications-list" class="p-4 space-y-2"></div>
+    </div>
+    <!-- Toast Notification -->
+    <div id="toastNotification" 
+        class="fixed bottom-5 right-5 z-50 hidden bg-white border border-gray-200 shadow-lg rounded-lg px-4 py-3 flex items-center space-x-2 animate-fade-in-out">
+    <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" 
+        viewBox="0 0 24 24">
+        <path d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z" />
+    </svg>
+    <span id="toastMessage" class="text-sm text-gray-700"></span>
+    </div>
+
+
+    <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const loggedInUser = {{ user|tojson }};
+    const el = document.getElementById("username");
+    if (el) el.textContent = loggedInUser;
+  });
+</script>
+    <script>
+    // Toggle sidebar desktop (repli/étend) avec le bouton dans la sidebar
+    const toggleSidebarBtn = document.getElementById('toggleSidebar');
+    function toggleSidebarDesktop() {
+        if (window.innerWidth >= 1024) {
+            sidebar.classList.toggle('collapsed');
+        }
+    }
+    if (toggleSidebarBtn) {
+        toggleSidebarBtn.addEventListener('click', toggleSidebarDesktop);
+    }
+    // Optionnel : retirer la classe collapsed si on repasse en mobile
+    window.addEventListener('resize', () => {
+        if (window.innerWidth < 1024) {
+            sidebar.classList.remove('collapsed');
+        }
+    });
+    </script>
+    <script>
+    // Menu déroulant utilisateur
+    const userMenuTrigger = document.getElementById('userMenuTrigger');
+    const userDropdown = document.getElementById('userDropdown');
+    const userMenuChevron = document.getElementById('userMenuChevron');
+    const userMenuTriggerWrapper = document.getElementById('userMenuTriggerWrapper');
+    if (userMenuTrigger && userDropdown && userMenuTriggerWrapper) {
+        userMenuTriggerWrapper.addEventListener('click', (e) => {
+            e.stopPropagation();
+            userDropdown.classList.toggle('hidden');
+            userMenuChevron.classList.toggle('rotate-180');
+        });
+        document.addEventListener('click', (e) => {
+            if (!userDropdown.classList.contains('hidden')) {
+                userDropdown.classList.add('hidden');
+                userMenuChevron.classList.remove('rotate-180');
+            }
+        });
+        userDropdown.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+    }
+    </script>
+        <!-- Popup notification -->
+    <div id="notificationPopup" class="fixed top-16 right-4 max-w-xs w-full bg-white/95 backdrop-blur-md border border-gray-300 rounded-lg shadow-lg p-4 text-gray-900 hidden z-50">
+    <div class="flex justify-between items-center mb-2">
+        <h3 class="font-semibold text-lg">Notifications</h3>
+        <button id="closeNotifPopup" class="text-gray-500 hover:text-gray-700">&times;</button>
+    </div>
+    <div id="notificationsList" class="space-y-2 max-h-64 overflow-y-auto">
+        <!-- Notifications dynamiques ici -->
+    </div>
+    </div>
+
+</body>
+</html>
+
+

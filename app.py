@@ -1,4 +1,6 @@
 from flask import Flask, render_template, request, redirect, session, make_response, flash, url_for, jsonify, Response, stream_with_context
+from flask_socketio import SocketIO, join_room, leave_room, emit
+import uuid
 import json
 import sqlite3
 import requests
@@ -548,9 +550,6 @@ def profile():
         return redirect('/')
     return render_template('profile.html', user=session['user'])
 
-@app.route('/test', methods=['GET', 'POST'])
-def test():
-        return render_template('test-brain.html')
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -894,6 +893,111 @@ def remove_friend():
     except Exception as e:
         print(f"Erreur suppression ami: {e}")
         return jsonify({'error': 'Erreur serveur'}), 500
+    
+# PARTIE MULTI:
+socketio = SocketIO(app, cors_allowed_origins="*")
+
+ROOMS = {}             # { room_id: { lock: bool, typing: {user: text}, queue: [] } }
+
+def get_room(room_id):
+    if room_id not in ROOMS:
+        ROOMS[room_id] = {
+            "lock": False,      # True → IA processing
+            "typing": {},       # username → partial text
+            "history": []       # list of message dicts
+        }
+    return ROOMS[room_id]
+
+@app.route("/multi/<room_id>")
+def multi(room_id):
+    if "user" not in session:
+        return redirect("/login")
+    return render_template("multi.html", room_id=room_id, user=session["user"])
+
+# WebSocket events ------------------------------------------------------
+@socketio.on("join")
+def on_join(data):
+    room = data["room"]
+    username = session["user"]
+    join_room(room)
+    get_room(room)  # ensure exists
+    emit("user_joined", {"user": username}, to=room)
+
+@socketio.on("typing")
+def on_typing(data):
+    room = data["room"]
+    room_obj = get_room(room)
+    room_obj["typing"][session["user"]] = data["text"]
+    emit("typing_update", room_obj["typing"], to=room, include_self=False)
+
+@socketio.on("send_message")
+def handle_msg(data):
+    room = data["room"]
+    msg = data["message"]
+    is_for_ai = data.get("is_for_ai", True)
+    username = session["user"]
+
+    room_obj = get_room(room)
+
+    # 1) Direct chat message (ignored by IA)
+    if not is_for_ai:
+        room_obj["history"].append({"user": username, "msg": msg, "for_ai": False})
+        emit("new_message", {"user": username, "msg": msg, "for_ai": False}, to=room)
+        return
+
+    # 2) IA turn – respect lock
+    if room_obj["lock"]:
+        emit("queue_position", {"pos": len(room_obj.get("queue", [])) + 1}, to=request.sid)
+        room_obj.setdefault("queue", []).append({"user": username, "msg": msg})
+        return
+
+    # Lock & broadcast
+    room_obj["lock"] = True
+    emit("lock_status", {"locked": True}, to=room)
+
+    # Call your existing /ask endpoint internally (stream)
+    import requests, json, threading
+
+    def call_ia():
+        payload = {
+            "userMessage": msg,
+            "conversation_id": room,
+            "model": "phi3:mini"
+        }
+        try:
+            with requests.post("http://localhost:8080/ask",
+                               json=payload,
+                               headers={"Content-Type": "application/json"},
+                               stream=True) as r:
+                buffer = ""
+                for line in r.iter_lines():
+                    if line:
+                        try:
+                            chunk = json.loads(line.decode())
+                            if "response" in chunk:
+                                buffer += chunk["response"]
+                                emit("ia_stream", {"delta": chunk["response"]}, to=room)
+                        except:
+                            pass
+            room_obj["history"].append({"user": username, "msg": msg, "for_ai": True, "reply": buffer})
+        finally:
+            room_obj["lock"] = False
+            emit("lock_status", {"locked": False}, to=room)
+            # Process next in queue
+            if room_obj.get("queue"):
+                next_req = room_obj["queue"].pop(0)
+                handle_msg({"room": room,
+                            "message": next_req["msg"],
+                            "is_for_ai": True})
+
+    threading.Thread(target=call_ia, daemon=True).start()
+
+# app.py
+@app.route('/test/<room_id>')   # or '/multi/<room_id>' if you prefer
+def test(room_id):
+    if 'user' not in session:
+        return redirect('/login')
+    return render_template('multi.html', room_id=room_id, user=session['user'])
 
 if __name__ =='__main__':
     print(datetime.datetime.now(ZoneInfo("Europe/Paris")))
