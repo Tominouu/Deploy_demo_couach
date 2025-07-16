@@ -210,6 +210,7 @@ Après tests :
 - Ajout de la page **collaboration** pour consulter les **amis**, envoyer des **demandes** directement depuis cette page.
 - Optimisation et correction des bugs des **notifications.**
 - Amélioration du confort **utilisateur.**
+- Ajout d'un **bouton upload** qui sera potentiellement utilisable pour les prochaines mises à jours.
 
 
 ---
