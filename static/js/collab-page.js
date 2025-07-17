@@ -233,9 +233,29 @@ async function confirmRemoveCollaborator() {
     }
 }
 
-function inviteToConversation(username) {
+async function inviteToConversation(username) {
     // Visual feedback only - this would typically open a modal or redirect
-    showToast(`Invitation envoyée à ${username} pour rejoindre une conversation IA`);
+    let num_room = (Math.random() + 1).toString(36).substring(7);
+    try {
+        const response = await fetch('/rooms', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ numroom: num_room, receiver: username})
+        });
+        if (response.ok) {
+            showToast(`Invitation envoyée à ${username} pour rejoindre une conversation`);
+        } else {
+            showToast('Erreur lors de l\'invitation', 'error');
+        }
+    } catch (error) {
+        console.error('Error inviting to conversation:', error);
+        showToast('Erreur lors de l\'invitation', 'error');
+    }
+    //hideAddModal();
+    //loadCollaborators(); // Reload the list to reflect changes
+    //showToast(`Invitation envoyée à ${username} pour rejoindre une conversation IA`);
 }
 
 function formatDate(dateString) {

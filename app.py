@@ -452,7 +452,7 @@ def admin_action():
         elif action == 'debug_fiends':
             conn = sqlite3.connect('users.db')
             c = conn.cursor()
-            c.execute('DELETE FROM friends_requests WHERE status = "pending" OR status = "rejected"')
+            c.execute('DELETE FROM friend_requests WHERE status = "pending" OR status = "rejected"')
             conn.commit()
             conn.close()
         elif action == 'restart_model':
@@ -914,11 +914,42 @@ def get_room(room_id):
         }
     return ROOMS[room_id]
 
-@app.route("/multi/<room_id>")
+@app.route("/conversations/<room_id>")
 def multi(room_id):
     if "user" not in session:
         return redirect("/login")
+    
     return render_template("multi.html", room_id=room_id, user=session["user"])
+
+@app.route('/rooms' , methods=['POST'])
+def list_rooms():
+    if "user" not in session:
+        return redirect("/login")
+    
+    data = request.get_json()
+    num_room = data.get('numroom')
+    print(num_room)
+    sender = session["user"]
+    receiver = data.get('receiver')
+    link = f"172.16.2.81:8294/conversations/{num_room}"
+    try:
+        now_paris = datetime.datetime.now(ZoneInfo("Europe/Paris"))
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        # Notifier l'expéditeur
+        c.execute('''
+            INSERT INTO notifications (user_username, type, message, created_at)
+            VALUES (?, ?, ?, ?)
+        ''', (sender, 'discussion_partage', f'{receiver} vous a invité dans une discussion avec le lien suivant: {link}', now_paris))
+        conn.commit()
+        conn.close()
+        return jsonify({'success': True, 'message': f'Room {num_room} created successfully.'})
+    except Exception as e:
+        print(f"Erreur lors de la création de la room: {e}")
+        return jsonify({'error': 'Erreur serveur'}), 500
+
+    
+    
 
 # WebSocket events ------------------------------------------------------
 @socketio.on("join")
