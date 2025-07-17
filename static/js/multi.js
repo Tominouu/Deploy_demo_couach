@@ -40,11 +40,11 @@ socket.on("lock_status", ({locked}) => {
 // -------- Messages --------
 function addMsg(user, msg, isAI=false) {
     const div = document.createElement("div");
-    div.className = `chat-message ${isAI ? "message-ai" : ""}`;
+    div.className = `chat-message flex${isAI ? "message-ai" : ""}`;
     div.innerHTML = `
         <div class="flex items-start space-x-3">
-            <div class="text-xs font-bold w-20 h-8 text-white flex justify-center pt-2" style="background: black;border-radius: 25px;">${user}</div>
-            <div class="flex-1 text-white">${msg}</div>
+            <div class="text-xs font-bold w-20 h-8 text-white flex justify-center pt-2 " style="background: black;border-radius: 25px;">${user}</div>
+            <div class="flex-initial text-white glass-dark" style="margin-top: 4px; word-break: break-word; white-space: normal;">${msg}</div>
         </div>`;
     messagesDiv.appendChild(div);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
