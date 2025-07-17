@@ -965,7 +965,7 @@ def handle_msg(data):
             "model": "phi3:mini"
         }
         try:
-            with requests.post("http://localhost:8080/ask",
+            with requests.post("http://localhost:11434/api/generate",
                                json=payload,
                                headers={"Content-Type": "application/json"},
                                stream=True) as r:
@@ -976,13 +976,13 @@ def handle_msg(data):
                             chunk = json.loads(line.decode())
                             if "response" in chunk:
                                 buffer += chunk["response"]
-                                emit("ia_stream", {"delta": chunk["response"]}, to=room)
+                                socketio.emit("ia_stream", {"delta": chunk["response"]}, to=room)
                         except:
                             pass
             room_obj["history"].append({"user": username, "msg": msg, "for_ai": True, "reply": buffer})
         finally:
             room_obj["lock"] = False
-            emit("lock_status", {"locked": False}, to=room)
+            socketio.emit("lock_status", {"locked": False}, to=room)
             # Process next in queue
             if room_obj.get("queue"):
                 next_req = room_obj["queue"].pop(0)

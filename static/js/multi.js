@@ -43,7 +43,7 @@ function addMsg(user, msg, isAI=false) {
     div.className = `chat-message ${isAI ? "message-ai" : ""}`;
     div.innerHTML = `
         <div class="flex items-start space-x-3">
-            <div class="text-xs font-bold w-20 text-white">${user}</div>
+            <div class="text-xs font-bold w-20 h-8 text-white flex justify-center pt-2" style="background: black;border-radius: 25px;">${user}</div>
             <div class="flex-1 text-white">${msg}</div>
         </div>`;
     messagesDiv.appendChild(div);
