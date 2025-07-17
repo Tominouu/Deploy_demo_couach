@@ -246,6 +246,7 @@ async function inviteToConversation(username) {
         });
         if (response.ok) {
             showToast(`Invitation envoyée à ${username} pour rejoindre une conversation`);
+            hideAddModal();
         } else {
             showToast('Erreur lors de l\'invitation', 'error');
         }

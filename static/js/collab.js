@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     notificationsList.innerHTML = notifications.map(n => `
       <div class="notification-item ${n.is_read ? 'read' : 'unread'}" data-id="${n.id}">
-        <p>${n.message}</p>
+        <div class="notification-message">${n.message}</div>
         ${n.type === 'friend_request' && !n.is_read ? `
           <div class="notification-actions">
             <button class="accept-btn" data-request-id="${n.related_id}">Accepter</button>
@@ -294,6 +294,14 @@ document.addEventListener('DOMContentLoaded', () => {
     .toast-popup.visible {
       opacity: 1;
     }
+    .notification-message a {
+    color: #3b82f6; /* blue-500 */
+    text-decoration: underline;
+  }
+  .notification-message a:hover {
+    color: #2563eb; /* blue-600 */
+  }
+
   `;
   document.head.appendChild(style);
 });

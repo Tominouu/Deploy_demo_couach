@@ -931,7 +931,7 @@ def list_rooms():
     print(num_room)
     sender = session["user"]
     receiver = data.get('receiver')
-    link = f"172.16.2.81:8294/conversations/{num_room}"
+    link = f"https://172.16.2.81:8294/conversations/{num_room}"
     try:
         now_paris = datetime.datetime.now(ZoneInfo("Europe/Paris"))
         conn = sqlite3.connect('users.db')
@@ -940,7 +940,7 @@ def list_rooms():
         c.execute('''
             INSERT INTO notifications (user_username, type, message, created_at)
             VALUES (?, ?, ?, ?)
-        ''', (sender, 'discussion_partage', f'{receiver} vous a invité dans une discussion avec le lien suivant: {link}', now_paris))
+        ''', (receiver, 'discussion_partage', f'{sender} vous a invité dans une discussion avec le lien suivant : <a href="{link}" target="_blank">Rejoindre la conversation</a>', now_paris))
         conn.commit()
         conn.close()
         return jsonify({'success': True, 'message': f'Room {num_room} created successfully.'})
