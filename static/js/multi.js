@@ -27,7 +27,7 @@ messageInput.addEventListener("input", () => {
 socket.on("typing_update", (typingMap) => {
     const arr = Object.entries(typingMap).filter(([, txt]) => txt);
     if (arr.length === 0) { typingBox.textContent = ""; return; }
-    const preview = arr.map(([u, txt]) => `${u}: ${txt.slice(0, 30)}…`).join(" | ");
+    const preview = arr.map(([u, txt]) => `${u}: ${txt.slice(0, 99999999999999)}…`).join(" | ");
     typingBox.textContent = `✍️ ${preview}`;
 });
 
@@ -43,9 +43,13 @@ function addMsg(user, msg, isAI=false) {
     div.className = `chat-message flex${isAI ? "message-ai" : ""}`;
     div.innerHTML = `
         <div class="flex items-start space-x-3">
-            <div class="text-xs font-bold w-20 h-8 text-white flex justify-center pt-2 " style="background: black;border-radius: 25px;">${user}</div>
-            <div class="flex-initial text-white glass-dark" style="margin-top: 4px; word-break: break-word; white-space: normal;">${msg}</div>
-        </div>`;
+    <div class="flex-none text-xs font-bold w-20 h-8 text-white flex justify-center items-center" style="background: black; border-radius: 25px; margin-top: 26px;">
+      ${user}
+    </div>
+    <div class="flex-1 text-white glass-dark mt-1" style="word-break: break-word; white-space: pre-wrap;border-radius: 20px; padding-right: 22px;">
+      ${msg}
+    </div>
+  </div>`;
     messagesDiv.appendChild(div);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
