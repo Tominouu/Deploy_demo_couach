@@ -18,8 +18,9 @@
                 <h2 class="text-xl font-semibold mb-4 text-slate-700">Base de données</h2>
                 <button class="btn-primary w-full py-2 px-4 rounded-lg text-white font-medium mb-2 transition hover:bg-slate-700" onclick="confirmAction('clean_users')">Nettoyer la table utilisateurs</button>
                 <button class="btn-primary w-full py-2 px-4 rounded-lg text-white font-medium mb-2 transition hover:bg-slate-700" onclick="confirmAction('clean_conversations')">Nettoyer la table conversations</button>
-                <button class="btn-primary w-full py-2 px-4 rounded-lg text-white font-medium transition hover:bg-slate-700" onclick="confirmAction('clean_history')">Nettoyer la table historique</button>
-                 <button class="btn-primary w-full py-2 px-4 rounded-lg text-white font-medium transition hover:bg-slate-700" onclick="confirmAction('clean_friends')">Nettoyer la table Collaborateurs</button>
+                <button class="btn-primary w-full py-2 px-4 rounded-lg text-white font-medium mb-2 transition hover:bg-slate-700" onclick="confirmAction('clean_history')">Nettoyer la table historique</button>
+                <button class="btn-primary w-full py-2 px-4 rounded-lg text-white font-medium mb-2 transition hover:bg-slate-700" onclick="confirmAction('clean_friends')">Nettoyer la table Collaborateurs</button>
+                <button class="btn-primary w-full py-2 px-4 rounded-lg text-white font-medium mb-2 transition hover:bg-slate-700" onclick="confirmAction('debug_fiends')">Debug demande d'amis</button>
             </div>
             <div class="bg-slate-100 rounded-xl p-6 flex flex-col items-center shadow">
                 <h2 class="text-xl font-semibold mb-4 text-slate-700">Serveur & IA</h2>
@@ -42,6 +43,7 @@
                 case 'clean_conversations': msg = "Voulez-vous vraiment nettoyer la table conversations ?"; break;
                 case 'clean_history': msg = "Voulez-vous vraiment nettoyer la table historique ?"; break;
                 case 'clean_friends': msg = "Voulez-vous vraiment nettoyer la table Collaborateurs ?"; break;
+                case 'debug_fiends': msg = "Voulez-vous vraiment déboguer les demandes d'amis ?"; break;
                 case 'restart_model': msg = "Redémarrer le modèle IA ?"; break;
                 case 'restart_flask': msg = "Redémarrer le serveur Flask ?"; break;
                 case 'run_model': msg = "Lancer le modèle phi3 ?"; break;
