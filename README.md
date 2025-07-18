@@ -212,8 +212,15 @@ Après tests :
 - Amélioration du confort **utilisateur.**
 - Ajout d'un **bouton upload** qui sera potentiellement utilisable pour les prochaines mises à jours.
 
-
 ---
+
+## 🧪 Update 17 Juillet - Feature Collaboration - Notifications
+
+- Correction des **bugs** liés à la discussion en temps **reel.**
+- Design de la page **chat** mais pour collaboration.
+- Debug des **demandes d'amis.**
+- Création de **salons de discussion**, invitation possible depuis la page **collaborateurs**, le système de **notification** a été lié.
+- Il manque encore l'implémentation de **l'ia** dans la discussion en direct.
 
 
 
