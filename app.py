@@ -941,6 +941,10 @@ def list_rooms():
             INSERT INTO notifications (user_username, type, message, created_at)
             VALUES (?, ?, ?, ?)
         ''', (receiver, 'discussion_partage', f'{sender} vous a invité dans une discussion avec le lien suivant : <a href="{link}" target="_blank">Rejoindre la conversation</a>', now_paris))
+        c.execute('''
+            INSERT INTO notifications (user_username, type, message, created_at)
+            VALUES (?, ?, ?, ?)
+        ''', (sender, 'discussion_partage', f'{sender} rejoignez la discussion que vous venez de créer avec {receiver} <a href="{link}" target="_blank">Rejoindre la conversation</a>', now_paris))
         conn.commit()
         conn.close()
         return jsonify({'success': True, 'message': f'Room {num_room} created successfully.'})
