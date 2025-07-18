@@ -1,2 +1,4 @@
 flask
 werkzeug
+flask_socketio 
+tzdata
