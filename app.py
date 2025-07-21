@@ -24,7 +24,7 @@ def force_https():
 def init_db():
     conn = sqlite3.connect('users.db')  # Une seule base de données
     c = conn.cursor()
-
+    #c.execute('DROP TABLE users')
     #c.execute('DROP TABLE conversations')
     #c.execute('DROP TABLE history')
     #c.execute('DROP TABLE notifications')
@@ -34,7 +34,8 @@ def init_db():
         id INTEGER PRIMARY KEY, 
         username TEXT UNIQUE, 
         password TEXT,
-        role TEXT DEFAULT 'user'
+        role TEXT DEFAULT 'user',
+        description TEXT DEFAULT ''
     )''')
     
     # Table conversations
@@ -533,9 +534,15 @@ def register():
 def profil():
     if 'user' not in session:
         return redirect('/login')
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    c.execute("SELECT description FROM users WHERE username = ?", (session['user'],))
+    description = c.fetchone()
+    conn.close()
     if request.method == 'POST':
         new_username = request.form['username']
         new_password = request.form['password']
+        new_description = request.form['description']
         if new_password:
             new_password = generate_password_hash(new_password)
         else:
@@ -543,11 +550,16 @@ def profil():
         
         conn = sqlite3.connect('users.db')
         c = conn.cursor()
-        
+        description = c.execute("SELECT description FROM users WHERE username = ?", (new_username,)).fetchone()[0]
+
+        if new_description:
+            c.execute("UPDATE users SET description = ? WHERE username = ?", (new_description, session['user']))
+            session['description'] = description
         if new_password:
             c.execute("UPDATE users SET username = ?, password = ? WHERE username = ?", (new_username, new_password, session['user']))
         else:
             c.execute("UPDATE users SET username = ? WHERE username = ?", (new_username, session['user']))
+        
         
         conn.commit()
         conn.close()
@@ -555,7 +567,7 @@ def profil():
         session['user'] = new_username
         flash('Profil mis à jour avec succès.', 'success')
         return redirect('/')
-    return render_template('profile.html', user=session['user'])
+    return render_template('profile.html', user=session['user'], description=description)
 
 @app.route('/profil/<username>', methods=['GET'])
 def view_profile(username):
