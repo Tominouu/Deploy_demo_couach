@@ -529,8 +529,8 @@ def register():
         return render_template('login.html', error="Nom d'utilisateur déjà pris")
     #return redirect('/login')
 
-@app.route('/profile', methods=['GET', 'POST'])
-def profile():
+@app.route('/profil', methods=['GET', 'POST'])
+def profil():
     if 'user' not in session:
         return redirect('/login')
     if request.method == 'POST':
