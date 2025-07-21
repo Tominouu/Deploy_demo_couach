@@ -233,7 +233,10 @@ Après tests :
 
 ## 🧪 Update 21 Juillet - Notifications - Optimisations 
 
-- Ajout du système de **notifications navigateur**, ces notifications prendront effet au lancement du navigateur ainsi que la pas ouverte en fond
+- Ajout du système de **notifications navigateur**, ces notifications prendront effet au lancement du navigateur ainsi que la page ouverte en fond
+- Refonte de la **page profil**
+
+
 
 
 
