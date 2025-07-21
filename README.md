@@ -222,6 +222,19 @@ Après tests :
 - Création de **salons de discussion**, invitation possible depuis la page **collaborateurs**, le système de **notification** a été lié.
 - Il manque encore l'implémentation de **l'ia** dans la discussion en direct.
 
+---
+
+## 🧪 Update 18 Juillet - Notifications
+
+- Ajout de **l'envoi** d'une notification à l'envoyeur pour garder une trace de **l'invitation**, le lien est également founit dedans.
+- Update des requirements.txt.
+
+---
+
+## 🧪 Update 21 Juillet - Notifications - Optimisations 
+
+- Ajout du système de **notifications navigateur**, ces notifications prendront effet au lancement du navigateur ainsi que la pas ouverte en fond.
+
 
 
 
