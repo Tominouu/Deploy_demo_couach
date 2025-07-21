@@ -91,7 +91,7 @@ function displayCollaborators(collaboratorsToShow) {
                         </svg>
                     </div>
                     <div>
-                        <h3 class="font-semibold text-gray-900">${collaborator.username}</h3>
+                        <a href="/profil/${collaborator.username}" target="blank"><h3 class="font-semibold text-gray-900">${collaborator.username}</h3></a>
                         <p class="text-sm text-gray-500">Collaborateur depuis ${formatDate(collaborator.created_at)}</p>
                     </div>
                 </div>

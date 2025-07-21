@@ -557,6 +557,19 @@ def profil():
         return redirect('/')
     return render_template('profile.html', user=session['user'])
 
+@app.route('/profil/<username>', methods=['GET'])
+def view_profile(username):
+    if 'user' not in session:
+        return redirect('/login')
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    c.execute("SELECT username, role FROM users WHERE username = ?", (username,))
+    user_data = c.fetchone()
+    conn.close()
+    if not user_data:
+        return render_template('404.html'), 404
+    return render_template('profile_show.html', user=user_data[0], role=user_data[1])
+
 
 @app.errorhandler(404)
 def page_not_found(e):
