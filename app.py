@@ -27,6 +27,7 @@ def init_db():
 
     #c.execute('DROP TABLE conversations')
     #c.execute('DROP TABLE history')
+    #c.execute('DROP TABLE notifications')
     
     # Table users
     c.execute('''CREATE TABLE IF NOT EXISTS users (

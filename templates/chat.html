@@ -6,6 +6,7 @@
     <title>CouachGPT</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/chat.css') }}">
+    <script src="/socket.io/socket.io.js"></script>
     <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
     <script src="{{ url_for('static', filename='js/collab.js') }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
@@ -277,7 +278,12 @@
     <span id="toastMessage" class="text-sm text-gray-700"></span>
     </div>
 
-
+    <script>document.addEventListener("DOMContentLoaded", () => {
+    if ("Notification" in window && Notification.permission !== "granted") {
+        Notification.requestPermission();
+    }
+    });
+    </script>
     <script>
     const loggedInUser = {{ user|tojson }};
     document.addEventListener("DOMContentLoaded", () => {

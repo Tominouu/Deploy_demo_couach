@@ -11,17 +11,26 @@ document.addEventListener('DOMContentLoaded', () => {
   let lastNotifIds = new Set();
 
   async function checkNewNotifications() {
-    const data = await fetchJSON('/notifications');
-    if (!data) return;
+  const data = await fetchJSON('/notifications');
+  if (!data) return;
 
-    data.forEach(notif => {
-      if (!lastNotifIds.has(notif.id) && !notif.is_read) {
-        showToast(notif.message);  // Affiche le toast
-        notifBadge.classList.remove('hidden'); // Montre le badge
-        lastNotifIds.add(notif.id);
-      }
-    });
-  }
+  data.forEach(notif => {
+    if (!lastNotifIds.has(notif.id) && !notif.is_read) {
+      // Affiche un petit popup
+      showToast(notif.message);
+
+      // 🔔 Affiche une vraie notif navigateur
+      const plainMessage = stripHtml(notif.message);
+      const linkMatch = notif.message.match(/https?:\/\/[^\s"]+/);
+      const link = linkMatch ? linkMatch[0] : null;
+      showBrowserNotification("Nouvelle notification", plainMessage, link);
+
+      notifBadge.classList.remove('hidden');
+      lastNotifIds.add(notif.id);
+    }
+  });
+}
+
 
   // Lancer la vérif toutes les 10 secondes
   setInterval(checkNewNotifications, 10000);
@@ -125,55 +134,96 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Charger notifications
   async function loadNotifications() {
-    const notifications = await fetchJSON('/notifications');
-    if (!notifications) {
-      notificationsList.innerHTML = '<p>Erreur chargement notifications.</p>';
-      return;
-    }
-    if (notifications.length === 0) {
-      notificationsList.innerHTML = '<p>Aucune notification.</p>';
-      return;
-    }
-    notificationsList.innerHTML = notifications.map(n => `
-      <div class="notification-item ${n.is_read ? 'read' : 'unread'}" data-id="${n.id}">
-        <div class="notification-message">${n.message}</div>
-        ${n.type === 'friend_request' && !n.is_read ? `
-          <div class="notification-actions">
-            <button class="accept-btn" data-request-id="${n.related_id}">Accepter</button>
-            <button class="reject-btn" data-request-id="${n.related_id}">Refuser</button>
-          </div>
-        ` : ''}
-      </div>
-    `).join('');
-
-    // Actions accepter/refuser
-    document.querySelectorAll('.accept-btn').forEach(btn => {
-      btn.onclick = () => respondFriendRequest(btn.dataset.requestId, 'accept');
-    });
-    document.querySelectorAll('.reject-btn').forEach(btn => {
-      btn.onclick = () => respondFriendRequest(btn.dataset.requestId, 'reject');
-    });
-    // Marquer comme lu quand on clique sur une notification simple
-    document.querySelectorAll('.notification-item').forEach(item => {
-      const notifId = item.dataset.id;
-      const isRequest = item.querySelector('.notification-actions');
-
-      if (!isRequest) {
-        item.addEventListener('click', async () => {
-          if (item.classList.contains('unread')) {
-            await fetchJSON('/mark_notification_read', {
-              method: 'POST',
-              headers: {'Content-Type': 'application/json'},
-              body: JSON.stringify({ notification_id: notifId })
-            });
-            item.classList.remove('unread');
-            item.classList.add('read');
-          }
-        });
+      const notifications = await fetchJSON('/notifications');
+      if (!notifications) {
+        notificationsList.innerHTML = '<p>Erreur chargement notifications.</p>';
+        return;
       }
-});
+      if (notifications.length === 0) {
+        notificationsList.innerHTML = '<p>Aucune notification.</p>';
+        return;
+      }
 
-  }
+      notificationsList.innerHTML = notifications.map(n => `
+        <div class="notification-item ${n.is_read ? 'read' : 'unread'}" data-id="${n.id}">
+          <div class="notification-message">${n.message}</div>
+          ${n.type === 'friend_request' && !n.is_read ? `
+            <div class="notification-actions">
+              <button class="accept-btn" data-request-id="${n.related_id}">Accepter</button>
+              <button class="reject-btn" data-request-id="${n.related_id}">Refuser</button>
+            </div>
+          ` : ''}
+        </div>
+      `).join('');
+
+      // --- Notifications navigateur pour les nouvelles notifications ---
+      notifications.forEach(n => {
+        if (!n.is_read) {
+          const plainMessage = stripHtml(n.message);
+          const linkMatch = n.message.match(/https?:\/\/[^\s"]+/);
+          const link = linkMatch ? linkMatch[0] : null;
+
+          showBrowserNotification("Nouvelle notification", plainMessage, link);
+        }
+      });
+
+      // Boutons accepter/refuser
+      document.querySelectorAll('.accept-btn').forEach(btn => {
+        btn.onclick = () => respondFriendRequest(btn.dataset.requestId, 'accept');
+      });
+      document.querySelectorAll('.reject-btn').forEach(btn => {
+        btn.onclick = () => respondFriendRequest(btn.dataset.requestId, 'reject');
+      });
+
+      // Marquer comme lu
+      document.querySelectorAll('.notification-item').forEach(item => {
+        const notifId = item.dataset.id;
+        const isRequest = item.querySelector('.notification-actions');
+
+        if (!isRequest) {
+          item.addEventListener('click', async () => {
+            if (item.classList.contains('unread')) {
+              await fetchJSON('/mark_notification_read', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ notification_id: notifId })
+              });
+              item.classList.remove('unread');
+              item.classList.add('read');
+            }
+          });
+        }
+      });
+    }
+
+    // --- Utilitaires ---
+
+    function showBrowserNotification(title, message, link = null) {
+      if ("Notification" in window && Notification.permission === "granted") {
+        const notif = new Notification(title, {
+          body: message,
+          icon: "/static/img/logo.png"  // Modifie le chemin selon ton projet
+        });
+
+        if (link) {
+          notif.onclick = () => window.open(link, '_blank');
+        }
+      }
+    }
+
+    function stripHtml(html) {
+      const div = document.createElement("div");
+      div.innerHTML = html;
+      return div.textContent || div.innerText || "";
+    }
+
+    // --- Demander permission au chargement ---
+    document.addEventListener("DOMContentLoaded", () => {
+      if ("Notification" in window && Notification.permission !== "granted") {
+        Notification.requestPermission();
+      }
+    });
+
 
   // Afficher / cacher popup notifications
   notificationsBtn.onclick = () => {
