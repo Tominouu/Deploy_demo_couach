@@ -233,8 +233,18 @@ Après tests :
 
 ## 🧪 Update 21 Juillet - Notifications - Optimisations 
 
-- Ajout du système de **notifications navigateur**, ces notifications prendront effet au lancement du navigateur ainsi que la page ouverte en fond
-- Refonte de la **page profil**
+- Ajout du système de **notifications navigateur**, ces notifications prendront effet au lancement du navigateur ainsi que la page ouverte en fond.
+- Refonte de la **page profil.**
+- Ajout de la possibilité de voir les **autres profils.**
+
+---
+
+## 🧪 Update 22 Juillet -   
+
+- 
+
+    
+
 
 
 

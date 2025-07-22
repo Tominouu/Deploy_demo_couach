@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/chat.css') }}">
     <script src="{{ url_for('static', filename='js/collab-page.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/notifs.js') }}"></script>
 </head>
 <body class="yacht-hero h-screen flex overflow-hidden">
     <!-- Sidebar -->
@@ -83,6 +84,15 @@
                     <p class="text-sm text-gray-600">Gérez vos collaborateurs et invitez-les à vos conversations</p>
                 </div>
                 <div class="flex space-x-3">
+                    <button id="notificationsBtn" 
+                        class="relative flex items-center justify-center w-10 h-10 p-2 rounded-full bg-white/80 hover:bg-white shadow transition">
+                    <svg class="w-6 h-6 text-gray-700 pointer-events-none" 
+                        fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                    </svg>
+                    <span id="notifBadge" 
+                            class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse hidden"></span>
+                    </button>
                     <button id="addCollaboratorBtn" class="btn-primary px-4 py-2 rounded-xl text-white px-4 py-2 rounded-lg font-medium transition flex items-center space-x-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -200,12 +210,42 @@
         </svg>
         <span id="toastMessage" class="text-sm text-gray-700"></span>
     </div>
-    
+    <!-- Popup Notifications -->
+    <div id="notifications-popup" class="hidden fixed top-16 right-4 w-96 max-h-[70vh] overflow-y-auto bg-white border border-gray-300 shadow-lg rounded-lg z-50">
+    <div id="notifications-list" class="p-4 space-y-2"></div>
+    </div>
+    <!-- Toast Notification -->
+    <div id="toastNotification" 
+        class="fixed bottom-5 right-5 z-50 hidden bg-white border border-gray-200 shadow-lg rounded-lg px-4 py-3 flex items-center space-x-2 animate-fade-in-out">
+    <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" 
+        viewBox="0 0 24 24">
+        <path d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z" />
+    </svg>
+    <span id="toastMessage" class="text-sm text-gray-700"></span>
+    </div>
+
+    <script>document.addEventListener("DOMContentLoaded", () => {
+    if ("Notification" in window && Notification.permission !== "granted") {
+        Notification.requestPermission();
+    }
+    });
+    </script>
+    <!-- Popup notification -->
+    <div id="notificationPopup" class="fixed top-16 right-4 max-w-xs w-full bg-white/95 backdrop-blur-md border border-gray-300 rounded-lg shadow-lg p-4 text-gray-900 hidden z-50">
+    <div class="flex justify-between items-center mb-2">
+        <h3 class="font-semibold text-lg">Notifications</h3>
+        <button id="closeNotifPopup" class="text-gray-500 hover:text-gray-700">&times;</button>
+    </div>
+    <div id="notificationsList" class="space-y-2 max-h-64 overflow-y-auto">
+        <!-- Notifications dynamiques ici -->
+    </div>
+    </div>
     <script>
         const loggedInUser = {{ user|tojson }};
         document.addEventListener('DOMContentLoaded', function() {
             initCollaborators();
         });
     </script>
+    
 </body>
 </html>
