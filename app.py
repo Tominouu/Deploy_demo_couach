@@ -1015,22 +1015,37 @@ def handle_msg(data):
     # 2) IA turn – respect lock
     if room_obj["lock"]:
         emit("queue_position", {"pos": len(room_obj.get("queue", [])) + 1}, to=request.sid)
-        room_obj.setdefault("queue", []).append({"user": username, "msg": msg})
+        room_obj.setdefault("queue", []).append({"user": username, "msg": msg, "model": data.get("model", "phi3:mini")})
         return
 
     # Lock & broadcast
     room_obj["lock"] = True
     emit("lock_status", {"locked": True}, to=room)
 
-    # Call your existing /ask endpoint internally (stream)
+    # Affiche le message utilisateur dans le feed avant la réponse IA
+    room_obj["history"].append({"user": username, "msg": msg, "for_ai": True})
+    emit("new_message", {"user": username, "msg": msg, "for_ai": True}, to=room)
+
     import requests, json, threading
 
     def call_ia():
+        # Construit le prompt avec l'historique du salon
+        history = room_obj.get("history", [])
+        context = ""
+        # On ne garde que les 2 derniers échanges (question/réponse)
+        for h in history[-2:]:
+            if h.get("for_ai") and h.get("reply"):
+                context += f"Utilisateur : {h['msg']}\nAssistant : {h['reply']}\n"
+            elif not h.get("for_ai"):
+                context += f"Utilisateur : {h['msg']}\n"
+        context += f"Utilisateur : {msg}\nAssistant :"
         payload = {
-            "userMessage": msg,
-            "conversation_id": room,
-            "model": "phi3:mini"
+            "model": data.get("model", "phi3:mini"),
+            "prompt": context,
+            "stream": True,
+            "max_tokens": 512
         }
+        print(f"Payload envoyé à Ollama: {payload}")  # LOG DEBUG
         try:
             with requests.post("http://localhost:11434/api/generate",
                                json=payload,
@@ -1042,6 +1057,7 @@ def handle_msg(data):
                         try:
                             chunk = json.loads(line.decode())
                             if "response" in chunk:
+                                print(f"IA chunk: {chunk['response']}")  # LOG DEBUG
                                 buffer += chunk["response"]
                                 socketio.emit("ia_stream", {"delta": chunk["response"]}, to=room)
                         except:
@@ -1055,7 +1071,8 @@ def handle_msg(data):
                 next_req = room_obj["queue"].pop(0)
                 handle_msg({"room": room,
                             "message": next_req["msg"],
-                            "is_for_ai": True})
+                            "is_for_ai": True,
+                            "model": next_req.get("model", "phi3:mini")})
 
     threading.Thread(target=call_ia, daemon=True).start()
 

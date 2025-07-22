@@ -207,6 +207,11 @@
                     <textarea id="messageInput" placeholder="Écrivez votre message..."
                             class="input-field w-full px-4 py-3 rounded-xl min-h-[50px] max-h-32"
                             rows="1"></textarea>
+                    <select id="modelSelect" class="rounded-lg border border-slate-300 px-2 py-2 focus:outline-none focus:ring-2 focus:ring-slate-400 bg-white text-gray-800 text-sm font-medium" style="margin-bottom: 8px;">
+                        <option value="phi3:mini">phi3:mini</option>
+                        <option value="deepseek-r1:1.5b">deepseek-r1:1.5b</option>
+                        <option value="mistral:7b">mistral:7b</option>
+                    </select>
                     <button id="sendChatBtn"
                             class="btn-primary px-4 py-3 rounded-xl text-white font-medium">
                         💬 Chat
