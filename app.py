@@ -1033,7 +1033,7 @@ def handle_msg(data):
         history = room_obj.get("history", [])
         context = ""
         # On ne garde que les 2 derniers échanges (question/réponse)
-        for h in history[-2:]:
+        for h in history[-4:]:
             if h.get("for_ai") and h.get("reply"):
                 context += f"Utilisateur : {h['msg']}\nAssistant : {h['reply']}\n"
             elif not h.get("for_ai"):

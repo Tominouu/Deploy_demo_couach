@@ -15,13 +15,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // -------- Envoi avec la touche Entrée --------
   function enter() {
-    sendChatBtn.addEventListener('click', addMsg);
+    sendChatBtn.addEventListener('click', () => send(false));
 
     messageInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         if (!sendChatBtn.disabled) {
-          addMsg();
+          send(false);
         }
       }
     });
@@ -57,7 +57,8 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="flex-none text-xs font-bold w-20 h-8 text-white flex justify-center items-center" style="background: #334155; border-radius: 25px; margin-top: 26px;">
             IA
           </div>
-          <div class="flex-1 glass-dark mt-1 ai-response-content" id="ai-stream" style="word-break: break-word; white-space: pre-wrap; border-radius: 20px; padding-right: 22px; color: #222; font-size: 1rem;"></div>
+              <div class="flex-1 glass-dark mt-1 ai-response-content" id="ai-stream" style="word-break: break-word; white-space: pre-wrap; border-radius: 20px; padding-right: 22px; color: white; font-size: 1rem;"></div>
+
         </div>`;
       messagesDiv.appendChild(div);
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
@@ -87,6 +88,10 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>`;
       messagesDiv.appendChild(div);
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+    // Correction : émission du message à tous les utilisateurs du salon si ce n'est pas IA
+    if (!isAI && !stream) {
+      socket.emit("new_message", {user, msg});
     }
   }
 
