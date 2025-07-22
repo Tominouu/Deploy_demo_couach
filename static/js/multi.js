@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const sendChatBtn   = document.getElementById("sendChatBtn");
   const sendIABtn     = document.getElementById("sendIABtn");
   const messagesDiv   = document.getElementById("messagesContainer");
+  const chatContainer = document.getElementById("chatContainer");
   const typingBox     = document.getElementById("typingBox");
   const lockOverlay   = document.getElementById("lockOverlay");
 
@@ -53,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
     div.className = `chat-message flex${isAI ? " message-ai" : ""}`;
     if (isAI && stream) {
       div.innerHTML = `
-        <div class="flex items-start space-x-3">
+        <div class="flex items-start space-x-3" style="background: #3c4a5d;">
           <div class="flex-none text-xs font-bold w-20 h-8 text-white flex justify-center items-center" style="background: #334155; border-radius: 25px; margin-top: 26px;">
             IA
           </div>
@@ -61,24 +62,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
         </div>`;
       messagesDiv.appendChild(div);
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      setTimeout(() => {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }, 10);
       return div.querySelector('.ai-response-content');
     } else if (isAI) {
       div.innerHTML = `
-        <div class="flex items-start space-x-3">
+        <div class="flex items-start space-x-3" style="background: #3c4a5d;">
           <div class="flex-none text-xs font-bold w-20 h-8 text-white flex justify-center items-center" style="background: #334155; border-radius: 25px; margin-top: 26px;">
-            IA
+        IA
           </div>
           <div class="flex-1 text-white glass-dark mt-1 ai-response-content" style="word-break: break-word; white-space: pre-wrap;border-radius: 20px; padding-right: 22px;">
-            ${formatMarkdown(msg)}
+        ${formatMarkdown(msg)}
           </div>
         </div>`;
       messagesDiv.appendChild(div);
       addCopyButtonsToCodeBlocks();
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      setTimeout(() => {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }, 10);
     } else {
       div.innerHTML = `
-        <div class="flex items-start space-x-3">
+        <div class="flex items-start space-x-3" style="background: #3c4a5d;">
           <div class="flex-none text-xs font-bold w-20 h-8 text-white flex justify-center items-center" style="background: black; border-radius: 25px; margin-top: 26px;">
             ${user}
           </div>
@@ -87,7 +92,9 @@ document.addEventListener("DOMContentLoaded", () => {
           </div>
         </div>`;
       messagesDiv.appendChild(div);
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      setTimeout(() => {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }, 10);
     }
     // Correction : émission du message à tous les utilisateurs du salon si ce n'est pas IA
     if (!isAI && !stream) {
@@ -179,10 +186,12 @@ document.addEventListener("DOMContentLoaded", () => {
     aiStreamText += delta;
     aiStreamDiv.innerHTML = formatMarkdown(aiStreamText);
     addCopyButtonsToCodeBlocks();
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    // Scroll automatique vers le bas pendant le streaming IA
+    setTimeout(() => {
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }, 10);
   });
   socket.on("lock_status", ({locked}) => {
-    lockOverlay.classList.toggle("hidden", !locked);
     sendIABtn.disabled = locked;
     if (!locked) {
       aiStreamDiv = null;
