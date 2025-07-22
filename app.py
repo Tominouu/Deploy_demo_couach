@@ -22,12 +22,25 @@ def force_https():
         return redirect(request.url.replace("http://", "https://"), code=301) 
 
 def init_db():
+    
     conn = sqlite3.connect('users.db')  # Une seule base de données
     c = conn.cursor()
     #c.execute('DROP TABLE users')
     #c.execute('DROP TABLE conversations')
     #c.execute('DROP TABLE history')
     #c.execute('DROP TABLE notifications')
+
+    # Table multi_history pour les discussions collaboratives
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS multi_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            room_id TEXT,
+            user TEXT,
+            prompt TEXT,
+            response TEXT,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
     
     # Table users
     c.execute('''CREATE TABLE IF NOT EXISTS users (
@@ -926,6 +939,124 @@ def remove_friend():
         print(f"Erreur suppression ami: {e}")
         return jsonify({'error': 'Erreur serveur'}), 500
     
+
+@app.route('/multi_rooms', methods=['GET'])
+def multi_rooms():
+    user = session.get('user')
+    if not user:
+        return jsonify([])
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    # Récupère toutes les rooms où l'utilisateur a participé
+    c.execute('''
+        SELECT room_id, MAX(timestamp) as last_time
+        FROM multi_history
+        WHERE user = ?
+        GROUP BY room_id
+        ORDER BY last_time DESC
+    ''', (user,))
+    rooms = c.fetchall()
+    # Pour chaque room, récupère le dernier message
+    room_list = []
+    for room_id, last_time in rooms:
+        c.execute('''
+            SELECT prompt, response, timestamp FROM multi_history
+            WHERE room_id = ? AND timestamp = ?
+        ''', (room_id, last_time))
+        last = c.fetchone()
+        room_list.append({
+            'room_id': room_id,
+            'last_prompt': last[0] if last else '',
+            'last_response': last[1] if last else '',
+            'timestamp': last[2] if last else last_time
+        })
+    conn.close()
+    return jsonify(room_list)
+
+
+@app.route('/multi_history/<room_id>', methods=['GET'])
+def get_multi_history(room_id):
+    user = session.get('user')
+    if not user:
+        return jsonify([])
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    c.execute('''
+        SELECT user, prompt, response, timestamp FROM multi_history
+        WHERE room_id = ?
+        ORDER BY timestamp ASC
+    ''', (room_id,))
+    rows = c.fetchall()
+    conn.close()
+    history = [
+        {
+            'user': row[0],
+            'prompt': row[1],
+            'response': row[2],
+            'timestamp': row[3]
+        } for row in rows
+    ]
+    return jsonify(history)
+
+
+@app.route('/save_multi_message', methods=['POST'])
+def save_multi_message():
+    user = session.get('user')
+    data = request.get_json()
+    room_id = data.get('room_id')
+    prompt = data.get('prompt')
+    if not user or not room_id or not prompt:
+        return jsonify({'error': 'missing data'}), 400
+    try:
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        c.execute('''
+            INSERT INTO multi_history (room_id, user, prompt, response, timestamp)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (room_id, user, prompt, '', datetime.datetime.now(ZoneInfo("Europe/Paris"))))
+        conn.commit()
+        conn.close()
+        return jsonify({'success': True})
+    except Exception as e:
+        print(f"Erreur save_multi_message: {e}")
+        return jsonify({'error': 'db error'}), 500
+    
+
+@app.route('/rename_multi_room/<room_id>', methods=['POST'])
+def rename_multi_room(room_id):
+    user = session.get('user')
+    data = request.get_json()
+    new_title = data.get('new_title')
+    if not user or not new_title:
+        return jsonify({'error': 'missing data'}), 400
+    try:
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        # On renomme la room en changeant son id dans multi_history
+        c.execute('UPDATE multi_history SET room_id = ? WHERE room_id = ?', (new_title, room_id))
+        conn.commit()
+        conn.close()
+        return jsonify({'success': True})
+    except Exception as e:
+        print(f"Erreur rename_multi_room: {e}")
+        return jsonify({'error': 'db error'}), 500
+
+@app.route('/delete_multi_room/<room_id>', methods=['POST'])
+def delete_multi_room(room_id):
+    user = session.get('user')
+    if not user:
+        return jsonify({'error': 'missing data'}), 400
+    try:
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        c.execute('DELETE FROM multi_history WHERE room_id = ?', (room_id,))
+        conn.commit()
+        conn.close()
+        return jsonify({'success': True})
+    except Exception as e:
+        print(f"Erreur delete_multi_room: {e}")
+        return jsonify({'error': 'db error'}), 500
+    
 # PARTIE MULTI:
 socketio = SocketIO(app, cors_allowed_origins="*")
 
@@ -1063,6 +1194,18 @@ def handle_msg(data):
                         except:
                             pass
             room_obj["history"].append({"user": username, "msg": msg, "for_ai": True, "reply": buffer})
+            # Sauvegarde dans la table multi_history
+            try:
+                conn = sqlite3.connect('users.db')
+                c = conn.cursor()
+                c.execute('''
+                    INSERT INTO multi_history (room_id, user, prompt, response, timestamp)
+                    VALUES (?, ?, ?, ?, ?)
+                ''', (room, username, msg, buffer, datetime.datetime.now(ZoneInfo("Europe/Paris"))))
+                conn.commit()
+                conn.close()
+            except Exception as e:
+                print(f"Erreur lors de la sauvegarde multi_history: {e}")
         finally:
             room_obj["lock"] = False
             socketio.emit("lock_status", {"locked": False}, to=room)
