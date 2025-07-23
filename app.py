@@ -16,11 +16,6 @@ app = Flask(__name__)
 app.secret_key = 'super-secret-key'
 app.permanent_session_lifetime = timedelta(hours=1)
 
-@app.before_request
-def force_https():
-    if request.scheme != 'https':
-        return redirect(request.url.replace("http://", "https://"), code=301) 
-
 def init_db():
     
     conn = sqlite3.connect('users.db')  # Une seule base de données
