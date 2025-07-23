@@ -1129,6 +1129,7 @@ def on_typing(data):
     emit("typing_update", room_obj["typing"], to=room, include_self=False)
 
 @socketio.on("send_message")
+
 def handle_msg(data):
     room = data["room"]
     msg = data["message"]
@@ -1141,6 +1142,20 @@ def handle_msg(data):
     if not is_for_ai:
         room_obj["history"].append({"user": username, "msg": msg, "for_ai": False})
         emit("new_message", {"user": username, "msg": msg, "for_ai": False}, to=room)
+        # Sauvegarde dans la table multi_history (pas de réponse IA)
+        try:
+            import datetime
+            from zoneinfo import ZoneInfo
+            conn = sqlite3.connect('users.db')
+            c = conn.cursor()
+            c.execute('''
+                INSERT INTO multi_history (room_id, user, prompt, response, timestamp)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (room, username, msg, None, datetime.datetime.now(ZoneInfo("Europe/Paris"))))
+            conn.commit()
+            conn.close()
+        except Exception as e:
+            print(f"Erreur lors de la sauvegarde multi_history (collaboratif): {e}")
         return
 
     # 2) IA turn – respect lock

@@ -239,9 +239,13 @@ Après tests :
 
 ---
 
-## 🧪 Update 22 Juillet -   
+## 🧪 Update 22 Juillet 
 
-- 
+- Ajout des notifications dans la page **collaborateurs.**
+- Possibilité d'envoyer son message en appuiyant sur la touche **Entrée** dans la page multi-utilisateurs.
+- Intégration de **l'IA** dans le système de conversation multi-utilisateurs.
+- Amélioration du **style** de la page multi-utilisateurs.
+- Ajout des **conversations** dans la base de données, et **affichage** côté Front.
 
     
 
