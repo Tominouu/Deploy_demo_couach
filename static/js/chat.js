@@ -568,12 +568,25 @@
                                 <p class="font-medium text-slate-800 mb-1">Assistant CouachGPT</p>
                                 <div class="text-slate-700 ai-response-content">
                                     ${formatMarkdown(message)}
+                                    <button class="speaker-btn ml-2 text-blue-400 hover:text-blue-600" title="Lire la réponse"><span style="font-size:1.2em;">🔊</span></button>
                                 </div>
                                 <span class="text-xs text-slate-500 mt-2 block">${timestamp}</span>
                             </div>
                         </div>
                     </div>
                 `;
+                // Ajout du speaker
+                const btn = messageDiv.querySelector('.speaker-btn');
+                if (btn) {
+                    btn.addEventListener('click', () => {
+                        const text = messageDiv.querySelector('.ai-response-content')?.innerText || '';
+                        if (text) {
+                            const utter = new window.SpeechSynthesisUtterance(text);
+                            utter.lang = 'fr-FR';
+                            window.speechSynthesis.speak(utter);
+                        }
+                    });
+                }
             }
             
             // Vérifier si typingIndicator est un enfant de messagesContainer

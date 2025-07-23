@@ -55,9 +55,22 @@ document.addEventListener("DOMContentLoaded", () => {
               <div class="flex-none text-xs font-bold w-20 h-8 text-white flex justify-center items-center" style="background: #334155; border-radius: 25px; margin-top: 26px;">IA</div>
               <div class="flex-1 text-white glass-dark mt-1 ai-response-content" style="word-break: break-word; white-space: pre-wrap;border-radius: 20px; padding-right: 22px;">
                 ${formatMarkdown(msg.response)}
+                <button class="speaker-btn ml-2 text-blue-400 hover:text-blue-600" title="Lire la réponse"><span style="font-size:1.2em;">🔊</span></button>
               </div>
             </div>`;
           messagesDiv.appendChild(aiDiv);
+          // Ajout du speaker
+          const btn = aiDiv.querySelector('.speaker-btn');
+          if (btn) {
+            btn.addEventListener('click', () => {
+              const text = aiDiv.querySelector('.ai-response-content')?.innerText || '';
+              if (text) {
+                const utter = new window.SpeechSynthesisUtterance(text);
+                utter.lang = 'fr-FR';
+                window.speechSynthesis.speak(utter);
+              }
+            });
+          }
         }
       });
       setTimeout(() => { chatContainer.scrollTop = chatContainer.scrollHeight; }, 10);
@@ -104,9 +117,8 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
         item.addEventListener('click', (e) => {
           if (!e.target.closest('.delete-room') && !e.target.closest('.edit-room')) {
-            loadRoomHistory(room.room_id);
-            document.querySelectorAll('.chat-item').forEach(i => i.classList.remove('active', 'bg-blue-900/60'));
-            item.classList.add('active', 'bg-blue-900/60');
+            // Redirige vers l'URL de la room collaborative
+            window.location.href = `/conversations/${room.room_id}`;
           }
         });
         // Renommer la room
